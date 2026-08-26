@@ -51,6 +51,17 @@ RecoverAI includes built-in verification tools and a dedicated Streamlit dashboa
 - **Webhook Verification & Idempotency:** Includes an interactive Webhook Simulator testing HMAC-SHA256 signature verification and verifying that duplicate webhooks output `200 Duplicate webhook ignored`.
 - **Chronological Audit Trail:** Forensic lifecycle logging for every event across all 7 pipeline stages.
 
+### 📸 Dashboard & Interface Showcase
+
+#### 1. Executive Performance Overview & Revenue Metrics
+![Executive Overview](docs/images/dashboard_overview.png)
+
+#### 2. AI Recovery Reasoning & Case Inspector
+![Case Explorer & AI Reasoning](docs/images/case_explorer.png)
+
+#### 3. Real Razorpay TEST Mode & Webhook Simulator
+![Live Razorpay TEST Mode](docs/images/live_razorpay_mode.png)
+
 ---
 
 ## 📐 Architecture
