@@ -280,7 +280,7 @@ python -m pytest
 
 ## ⚠️ Known Limitations
 
-- **Razorpay TEST Sandbox Limits:** Due to sandbox rate limits and batch processing constraints, only a subset of benchmark events generate real Razorpay TEST payment links, while the remaining 100-event benchmark suite is evaluated synthetically.
+- **Razorpay TEST Payment Link Cap:** Razorpay's TEST mode limits Payment Link creation to 30 per business account, so only a subset of the 100-event benchmark generates real Razorpay links; the remainder is evaluated synthetically via `simulate_response.py`.
 - **TEST Mode Sandbox:** Real integration requires active Razorpay TEST Mode credentials in `.env`.
 - **Heuristic Fallback:** If `LLM_API_KEY` is not provided, ambiguous checkout abandonments fall back to deterministic heuristic diagnosis without failing.
 - **Idempotent Webhooks:** Duplicate webhooks with existing `external_event_id` are safely ignored.
