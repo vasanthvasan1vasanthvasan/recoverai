@@ -62,7 +62,11 @@ def ensure_database() -> None:
                 requires_human BOOLEAN,
                 executed_at DATETIME,
                 outcome TEXT,
-                amount_recovered INTEGER DEFAULT 0
+                amount_recovered INTEGER DEFAULT 0,
+                human_review_status TEXT DEFAULT 'pending',
+                human_reviewer TEXT NULL,
+                human_reviewed_at DATETIME NULL,
+                human_notes TEXT NULL
             );
 
             CREATE TABLE IF NOT EXISTS recovery_actions (
@@ -105,6 +109,17 @@ def ensure_database() -> None:
             );
             """
         )
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(decisions)")
+        columns = [column[1] for column in cursor.fetchall()]
+        if "human_review_status" not in columns:
+            cursor.execute("ALTER TABLE decisions ADD COLUMN human_review_status TEXT DEFAULT 'pending'")
+        if "human_reviewer" not in columns:
+            cursor.execute("ALTER TABLE decisions ADD COLUMN human_reviewer TEXT NULL")
+        if "human_reviewed_at" not in columns:
+            cursor.execute("ALTER TABLE decisions ADD COLUMN human_reviewed_at DATETIME NULL")
+        if "human_notes" not in columns:
+            cursor.execute("ALTER TABLE decisions ADD COLUMN human_notes TEXT NULL")
 
 
 @contextmanager
@@ -433,3 +448,75 @@ def list_audit_logs(event_id: str | None = None) -> list[dict[str, Any]]:
     else:
         rows = fetch_all("SELECT * FROM audit_logs ORDER BY timestamp ASC")
     return [dict(row) for row in rows]
+
+
+def get_pending_human_cases(source: str | None = None) -> list[dict[str, Any]]:
+    ensure_database()
+    where_clauses = ["(d.outcome = 'escalated' OR d.requires_human = 1 OR d.action_chosen = 'escalate_to_human')"]
+    where_clauses.append("(d.human_review_status IS NULL OR d.human_review_status = 'pending')")
+    params: list[Any] = []
+    if source:
+        where_clauses.append("e.source = ?")
+        params.append(source)
+
+    where_str = " WHERE " + " AND ".join(where_clauses)
+
+    rows = fetch_all(
+        f"""
+        SELECT
+            e.event_id,
+            e.customer_name,
+            e.customer_id,
+            e.event_type,
+            e.amount,
+            e.currency,
+            e.created_at,
+            e.source,
+            d.diagnosis,
+            d.diagnosis_confidence,
+            d.diagnosis_reasoning,
+            d.action_chosen,
+            d.policy_allowed,
+            d.policy_rule_applied,
+            d.action_reasoning,
+            d.outcome,
+            d.amount_recovered,
+            d.human_review_status,
+            d.human_reviewer,
+            d.human_reviewed_at,
+            d.human_notes,
+            c.email as customer_email,
+            c.phone as customer_phone
+        FROM events e
+        JOIN decisions d ON d.event_id = e.event_id
+        LEFT JOIN customers c ON c.customer_id = e.customer_id
+        {where_str}
+        ORDER BY e.created_at DESC
+        """,
+        tuple(params),
+    )
+    return [dict(row) for row in rows]
+
+
+def update_human_review_record(
+    event_id: str,
+    human_status: str,
+    reviewer: str = "human_operator",
+    notes: str = "",
+    new_outcome: str | None = None,
+) -> None:
+    now = utcnow_iso()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        updates = ["human_review_status = ?", "human_reviewer = ?", "human_reviewed_at = ?", "human_notes = ?"]
+        params = [human_status, reviewer, now, notes]
+        if new_outcome is not None:
+            updates.append("outcome = ?")
+            params.append(new_outcome)
+
+        params.append(event_id)
+        cursor.execute(
+            f"UPDATE decisions SET {', '.join(updates)} WHERE event_id = ?",
+            tuple(params),
+        )
+

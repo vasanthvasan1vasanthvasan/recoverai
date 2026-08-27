@@ -12,12 +12,14 @@ from db import (
     fetch_all,
     get_customer,
     get_event,
+    get_pending_human_cases,
     insert_customer,
     insert_event,
     list_audit_logs,
     list_cases,
 )
 from generate_synthetic_data import main as generate_data
+from human_review import approve_case, reject_case
 from pipeline import process_all_events, process_event
 from razorpay_client import RazorpayClient, RazorpayClientError
 from report import compute_metrics
@@ -282,7 +284,7 @@ def main() -> None:
         st.caption(f"Razorpay Integration: **{'Connected ✅' if settings.razorpay_enabled else 'Not Configured ⚠️'}**")
         st.caption(f"LLM API Integration: **{'Active ✅' if settings.llm_api_key else 'Heuristic Fallback ℹ️'}**")
 
-    tabs = st.tabs(["📊 Executive Overview", "🔎 Case Explorer", "📜 Audit Trail", "🧪 Evaluation Metrics", "⚡ Live Razorpay TEST Mode"])
+    tabs = st.tabs(["📊 Executive Overview", "🔎 Case Explorer", "🙋 Human Review Queue", "📜 Audit Trail", "🧪 Evaluation Metrics", "⚡ Live Razorpay TEST Mode"])
 
     # Determine active source filter
     if dataset_filter == "100-Event Synthetic Benchmark":
@@ -411,8 +413,60 @@ def main() -> None:
                                 unsafe_allow_html=True,
                             )
 
-    # TAB 3: AUDIT TRAIL
+    # TAB 3: HUMAN REVIEW QUEUE
     with tabs[2]:
+        st.subheader(f"🙋 Pending Human Escalations Queue ({dataset_filter})")
+        st.caption("Review cases escalated by AI confidence thresholds or policy limits. Manually approve or reject candidate recovery actions.")
+
+        pending_cases = get_pending_human_cases(source=selected_source)
+
+        col_hr1, col_hr2 = st.columns(2)
+        with col_hr1:
+            st.metric("Pending Human Escalations", len(pending_cases))
+        with col_hr2:
+            st.metric("Historical Total Escalated (Frozen)", active_metrics["human_escalations"])
+
+        st.markdown("---")
+
+        if not pending_cases:
+            st.success("✅ No pending human escalation cases in the queue! All escalated cases have been reviewed or none are pending.")
+        else:
+            for p_case in pending_cases:
+                event_id = p_case["event_id"]
+                amount_inr = p_case["amount"] / 100
+                with st.expander(f"🔴 Case {event_id} - {p_case['customer_name']} (₹{amount_inr:,.2f})", expanded=True):
+                    h_col1, h_col2 = st.columns(2)
+                    with h_col1:
+                        st.markdown(f"**Customer ID:** `{p_case['customer_id']}`")
+                        st.markdown(f"**Event Type:** `{p_case['event_type']}`")
+                        st.markdown(f"**Amount at Risk:** ₹{amount_inr:,.2f} {p_case['currency']}")
+                        st.markdown(f"**Created At:** {p_case['created_at']}")
+                        st.markdown(f"**Proposed Candidate Action:** `{p_case['action_chosen']}`")
+                    with h_col2:
+                        st.markdown(f"**Diagnosis:** `{p_case['diagnosis']}`")
+                        st.markdown(f"**Confidence:** {p_case['diagnosis_confidence'] or 0.0:.2%}")
+                        st.markdown(f"**Policy Rule Applied:** `{p_case['policy_rule_applied'] or 'N/A'}`")
+                        st.markdown(f"**Escalation Reason:** {p_case['action_reasoning'] or 'Policy threshold exceeded'}")
+
+                    st.markdown("**Diagnosis Reasoning:**")
+                    st.info(p_case['diagnosis_reasoning'] or "No reasoning available.")
+
+                    review_notes = st.text_input("Reviewer Notes / Justification", key=f"notes_{event_id}", placeholder="Enter optional notes for audit log...")
+
+                    b_col1, b_col2 = st.columns(2)
+                    with b_col1:
+                        if st.button(f"✅ Approve Action ({event_id})", key=f"approve_{event_id}", use_container_width=True, type="primary"):
+                            res = approve_case(event_id, reviewer="human_operator", notes=review_notes)
+                            st.success(f"Approved! Candidate action '{res['candidate_action']}' executed cleanly.")
+                            st.rerun()
+                    with b_col2:
+                        if st.button(f"❌ Reject Action ({event_id})", key=f"reject_{event_id}", use_container_width=True):
+                            res = reject_case(event_id, reviewer="human_operator", notes=review_notes)
+                            st.warning(f"Rejected! Zero network calls made. Case marked as stopped.")
+                            st.rerun()
+
+    # TAB 4: AUDIT TRAIL
+    with tabs[3]:
         st.subheader("📜 Complete Application Audit Logs")
         logs = list_audit_logs()
         if not logs:
@@ -424,8 +478,8 @@ def main() -> None:
             filtered_logs = df_logs[df_logs["stage"].isin(selected_stages)]
             st.dataframe(filtered_logs, use_container_width=True, height=450)
 
-    # TAB 4: EVALUATION METRICS
-    with tabs[3]:
+    # TAB 5: EVALUATION METRICS
+    with tabs[4]:
         st.subheader("🧪 Synthetic Batch Evaluation Results (100 Events)")
         st.caption("Evaluation against 60 Subscription Failures & 40 Checkout Abandonment Events (Reproducible Seed)")
         render_metrics_cards(synthetic_metrics)
@@ -442,8 +496,8 @@ def main() -> None:
             st.markdown("#### Event Type Breakdown")
             st.json(synthetic_metrics["event_type_distribution"])
 
-    # TAB 5: LIVE RAZORPAY TEST MODE
-    with tabs[4]:
+    # TAB 6: LIVE RAZORPAY TEST MODE
+    with tabs[5]:
         st.subheader("⚡ Live Razorpay TEST Mode Integration")
         st.caption("Create real Payment Links using Razorpay TEST APIs and simulate live Webhooks.")
 
