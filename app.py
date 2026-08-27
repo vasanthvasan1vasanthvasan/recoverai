@@ -590,20 +590,8 @@ def main() -> None:
             })
 
         st.markdown("---")
-        st.markdown("### 🌐 Real Live Webhook Delivery via ngrok")
-        st.info(
-            "**Step-by-Step Guide for Live Razorpay Webhook Testing:**\n\n"
-            "1. **Start Local Webhook Listener:** Run `python webhook.py` in terminal (listens on `http://localhost:8000`).\n"
-            "2. **Launch ngrok Tunnel:** Run `ngrok http 8000` to create a public HTTPS endpoint.\n"
-            "3. **Configure Razorpay Dashboard:** Go to *Razorpay Dashboard -> Settings -> Webhooks -> Add Webhook*.\n"
-            "4. **Set Webhook URL:** Enter `https://YOUR_NGROK_SUBDOMAIN.ngrok-free.app/webhooks/razorpay`.\n"
-            "5. **Active Event:** Select `payment_link.paid` and set your `RAZORPAY_WEBHOOK_SECRET`.\n"
-            "6. **Live End-to-End Verification:** Complete a test payment link payment in browser. Razorpay will send live HTTP POST to ngrok -> local listener updates outcome to `paid` with 0 manual intervention!"
-        )
-
-        st.markdown("---")
         st.markdown("### 🔔 Test Webhook Handler (`payment_link.paid`) & Idempotency")
-        st.caption("Simulate an incoming Razorpay webhook event to test signature verification & strict idempotency.")
+        st.caption("Simulate an incoming Razorpay webhook event to test signature verification & strict idempotency. (Live delivery is verified via a Serveo/SSH public tunnel — see README for architecture).")
 
         wh_col1, wh_col2 = st.columns(2)
         with wh_col1:
