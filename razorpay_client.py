@@ -76,6 +76,12 @@ class RazorpayClient:
         except Exception:
             return False
 
+    def generate_webhook_signature(self, body: str, secret: str) -> str:
+        import hashlib
+        import hmac
+
+        return hmac.new(secret.encode("utf-8"), body.encode("utf-8"), hashlib.sha256).hexdigest()
+
     def _require_client(self):
         if self._client is None:
             raise RazorpayClientError("Razorpay TEST credentials or SDK are not available.")

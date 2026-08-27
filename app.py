@@ -616,8 +616,17 @@ def main() -> None:
                         },
                     }
                     raw_body = json.dumps(test_payload)
-                    sig = "simulated_valid_signature" if not settings.razorpay_webhook_secret else RazorpayClient().generate_webhook_signature(raw_body, settings.razorpay_webhook_secret)
-                    body, status = handle_webhook(raw_body, sig, client=RazorpayClient() if settings.razorpay_webhook_secret else None)
+                    secret = settings.razorpay_webhook_secret or "test_webhook_secret"
+                    sig = RazorpayClient().generate_webhook_signature(raw_body, secret)
+                    
+                    class UIWebhookClient:
+                        def verify_webhook_signature(self, body: str, signature: str, sec: str) -> bool:
+                            import hashlib, hmac
+                            expected = hmac.new(sec.encode("utf-8"), body.encode("utf-8"), hashlib.sha256).hexdigest()
+                            return signature == expected or signature == "simulated_valid_signature"
+                    
+                    client_to_use = RazorpayClient() if settings.razorpay_enabled else UIWebhookClient()
+                    body, status = handle_webhook(raw_body, sig, client=client_to_use)
                     if status == 200:
                         st.success(f"Webhook Response: {body}")
                     else:
@@ -638,8 +647,17 @@ def main() -> None:
                         },
                     }
                     raw_body = json.dumps(test_payload)
-                    sig = "simulated_valid_signature" if not settings.razorpay_webhook_secret else RazorpayClient().generate_webhook_signature(raw_body, settings.razorpay_webhook_secret)
-                    body, status = handle_webhook(raw_body, sig, client=RazorpayClient() if settings.razorpay_webhook_secret else None)
+                    secret = settings.razorpay_webhook_secret or "test_webhook_secret"
+                    sig = RazorpayClient().generate_webhook_signature(raw_body, secret)
+                    
+                    class UIWebhookClient:
+                        def verify_webhook_signature(self, body: str, signature: str, sec: str) -> bool:
+                            import hashlib, hmac
+                            expected = hmac.new(sec.encode("utf-8"), body.encode("utf-8"), hashlib.sha256).hexdigest()
+                            return signature == expected or signature == "simulated_valid_signature"
+                    
+                    client_to_use = RazorpayClient() if settings.razorpay_enabled else UIWebhookClient()
+                    body, status = handle_webhook(raw_body, sig, client=client_to_use)
                     if body.get("status") == "duplicate":
                         st.warning(f"Idempotency Verified! Duplicate webhook safely ignored: {body}")
                     else:
