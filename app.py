@@ -661,44 +661,6 @@ def main() -> None:
                     else:
                         st.info(f"Response: {body}")
 
-                payload_dict = {
-                    "event": "payment_link.paid",
-                    "payload": {
-                        "payment_link": {
-                            "entity": {
-                                "id": plink_id_test,
-                                "reference_id": ref_id_test,
-                                "amount": amount_test,
-                                "status": "paid",
-                            }
-                        }
-                    },
-                }
-                raw_body = json.dumps(payload_dict)
-                # Verify with stub / client if secret set
-                if not settings.razorpay_webhook_secret:
-                    st.warning("`RAZORPAY_WEBHOOK_SECRET` not set in `.env`. Using test signature secret.")
-                    secret = "secret"
-                else:
-                    secret = settings.razorpay_webhook_secret
-
-                client = RazorpayClient()
-                if client.enabled:
-                    import hmac, hashlib
-                    sig = hmac.new(secret.encode(), raw_body.encode(), hashlib.sha256).hexdigest()
-                else:
-                    sig = "valid"
-                    class StubClient:
-                        def verify_webhook_signature(self, body, signature, secret):
-                            return True
-                    client = StubClient()
-
-                body, status_code = handle_webhook(raw_body, sig, client=client)
-                if status_code == 200:
-                    st.success(f"Webhook Result ({status_code}): {body}")
-                else:
-                    st.error(f"Webhook Result ({status_code}): {body}")
-
         st.markdown("---")
         st.markdown("### 📜 Recorded Razorpay TEST Actions")
         live_actions = fetch_all(
