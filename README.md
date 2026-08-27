@@ -150,7 +150,6 @@ RecoverAI includes built-in verification tools and a dedicated Streamlit dashboa
 - Diagnoses ambiguous checkout abandonment events using cart state, duration, and checkout step.
 - Assigns a diagnosis confidence score (0.00 – 1.00).
 - Generates natural-language reasoning explaining customer cart friction.
-- Provides context-aware customer communication text based on language preferences (`en`, `hi`).
 
 ### What AI Does NOT Do
 - Does **NOT** make final policy or financial decisions.
