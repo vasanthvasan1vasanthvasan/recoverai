@@ -457,7 +457,7 @@ def main() -> None:
             for p_case in pending_cases:
                 event_id = p_case["event_id"]
                 amount_inr = p_case["amount"] / 100
-                with st.expander(f"🔴 Case {event_id} - {p_case['customer_name']} (₹{amount_inr:,.2f})", expanded=True):
+                with st.expander(f"⚠️ Case {event_id} - {p_case['customer_name']} (₹{amount_inr:,.2f})", expanded=True):
                     h_col1, h_col2 = st.columns(2)
                     with h_col1:
                         st.markdown(f"**Customer ID:** `{p_case['customer_id']}`")
@@ -478,12 +478,12 @@ def main() -> None:
 
                     b_col1, b_col2 = st.columns(2)
                     with b_col1:
-                        if st.button(f"✅ Approve Action ({event_id})", key=f"approve_{event_id}", use_container_width=True, type="primary"):
+                        if st.button(f"🟢 Approve Action ({event_id})", key=f"approve_{event_id}", use_container_width=True, type="primary"):
                             res = approve_case(event_id, reviewer="human_operator", notes=review_notes)
                             st.success(f"Approved! Candidate action '{res['candidate_action']}' executed cleanly.")
                             st.rerun()
                     with b_col2:
-                        if st.button(f"❌ Reject Action ({event_id})", key=f"reject_{event_id}", use_container_width=True):
+                        if st.button(f"🔴 Reject Action ({event_id})", key=f"reject_{event_id}", use_container_width=True):
                             res = reject_case(event_id, reviewer="human_operator", notes=review_notes)
                             st.warning(f"Rejected! Zero network calls made. Case marked as stopped.")
                             st.rerun()
@@ -522,7 +522,7 @@ def main() -> None:
     # TAB 6: LIVE RAZORPAY TEST MODE
     with tabs[5]:
         st.subheader("⚡ Live Razorpay TEST Mode Integration")
-        st.caption("Create real Payment Links using Razorpay TEST APIs and simulate live Webhooks.")
+        st.caption("Create Razorpay TEST payment links and verify end-to-end webhook delivery and idempotency.")
 
         c_top1, c_top2 = st.columns(2)
         with c_top1:
