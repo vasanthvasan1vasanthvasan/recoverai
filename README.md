@@ -215,6 +215,29 @@ RecoverAI integrates with Razorpay via the official Python SDK (`razorpay` packa
 
 ---
 
+## 🙋 Human Review Queue & Escalation Workflow
+
+When an event is escalated by safety policy guardrails (e.g. amount exceeding ₹10,000 or low AI diagnosis confidence):
+
+- **Pending Escalations Queue:** Escalated cases appear automatically in the dashboard's **`🙋 Human Review Queue`** tab.
+- **Reviewer Inspection:** Human operators can inspect customer profile details, failure context, AI diagnosis, confidence score, and policy escalation reasons.
+- **Approve Workflow (`approve_case`):** Re-executes the original candidate recovery action (e.g. creating payment links) using the unified `act.py` execution engine.
+- **Reject Workflow (`reject_case`):** Immediately marks the case as `stopped` and logs a `human_rejected` audit record with **0 network/API calls executed**.
+- **Immutable Historical Benchmark:** Reviews update pending queue status while keeping historical decision escalation metrics strictly immutable for benchmark evaluation integrity.
+
+---
+
+## 🌐 Live Webhook Delivery via ngrok
+
+RecoverAI supports real-time, end-to-end live webhook delivery from Razorpay servers:
+
+1. **Flask Listener & Health Monitoring:** `webhook.py` runs on port `8000` with a `/health` status endpoint.
+2. **ngrok Tunneling:** Exposes `http://localhost:8000` securely to the internet via HTTPS (`ngrok http 8000`).
+3. **Razorpay Dashboard Integration:** Configure Webhook URL in Razorpay Dashboard (`https://<ngrok-subdomain>.ngrok-free.app/webhooks/razorpay`) with secret validation.
+4. **HMAC-SHA256 Validation & Idempotency:** Validates `X-Razorpay-Signature` and checks `external_event_id` in SQLite database. Duplicate webhook resends return HTTP 200 with `status: duplicate` without double-counting recovered revenue.
+
+---
+
 ## ⚙️ Installation
 
 ```bash
