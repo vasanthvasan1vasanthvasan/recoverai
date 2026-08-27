@@ -49,6 +49,7 @@ def compute_metrics(source: str | None = None, channel: str | None = None) -> di
         "amount_recovered": amount_recovered,
         "recovery_rate": recovery_rate,
         "escalation_count": escalations,
+        "human_escalations": escalations,
         "escalation_rate": escalation_rate,
         "blocked_action_count": blocked_actions,
         "stopped_action_count": blocked_actions,

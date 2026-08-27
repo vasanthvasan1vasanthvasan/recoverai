@@ -424,7 +424,7 @@ def main() -> None:
         with col_hr1:
             st.metric("Pending Human Escalations", len(pending_cases))
         with col_hr2:
-            st.metric("Historical Total Escalated (Frozen)", active_metrics["human_escalations"])
+            st.metric("Historical Total Escalated (Frozen)", active_metrics.get("human_escalations", active_metrics.get("escalation_count", 0)))
 
         st.markdown("---")
 
