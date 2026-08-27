@@ -102,19 +102,28 @@ RecoverAI includes built-in verification tools and a dedicated Streamlit dashboa
                                   | Quiet Hours | Opt-Out | Caps | Limits |
                                   +---------------------------------------+
                                                       |
-                                                      v
-                                  +---------------------------------------+
-                                  |             [5. ACT]                  |
-                                  | Razorpay TEST Payment Links / Escalate|
-                                  +---------------------------------------+
-                                                      |
-                                                      v
-                                  +---------------------------------------+
-                                  |            [6. TRACK]                 |
-                                  | Webhook Listener (HMAC & Idempotency) |
-                                  +---------------------------------------+
-                                                      |
-                                                      v
+                              +-----------------------+-----------------------+
+                              |                                               |
+                           ALLOWED                                           BLOCKED
+                              |                                               |
+                              v                                               v
+              +---------------------------+                   +---------------------------+
+              |          [5. ACT]         |                   |      NO ACTION TAKEN      |
+              | Razorpay TEST Payment Link|                   | Escalate to Human /       |
+              | Created via API           |                   | Stop (opt-out, quiet      |
+              |                           |                   | hours, over limit, etc.)  |
+              +-------------+-------------+                   +-------------+-------------+
+                            |                                               |
+                            v                                               |
+              +---------------------------+                                  |
+              |        [6. TRACK]         |                                  |
+              | Webhook Listener          |                                  |
+              | (HMAC & Idempotency)      |                                  |
+              +-------------+-------------+                                  |
+                            |                                               |
+                            +-----------------------+-----------------------+
+                                                    |
+                                                    v
                                   +---------------------------------------+
                                   |            [7. REPORT]                |
                                   | Streamlit Dashboard & SQLite Metrics  |
