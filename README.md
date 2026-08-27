@@ -108,13 +108,12 @@ RecoverAI includes built-in verification tools and a dedicated Streamlit dashboa
                               |                                               |
                               v                                               v
               +---------------------------+                   +---------------------------+
-              |          [5. ACT]         |                   |      NO ACTION TAKEN      |
-              | Razorpay TEST Payment Link|                   | Escalate to Human /       |
-              | Created via API           |                   | Stop (opt-out, quiet      |
-              |                           |                   | hours, over limit, etc.)  |
-              +-------------+-------------+                   +-------------+-------------+
-                            |                                               |
-                            v                                               |
+              |          [5. ACT]         |                   |      POLICY BLOCKED       |
+              | Razorpay TEST Payment Link|                   | No autonomous action      |
+              | Created via API           |                   | taken                     |
+              +-------------+-------------+                   | → Human Review            |
+                            |                                  | → Stop / Suppress         |
+                            v                                  +-------------+-------------+
               +---------------------------+                                  |
               |        [6. TRACK]         |                                  |
               | Webhook Listener          |                                  |
