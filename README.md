@@ -188,7 +188,7 @@ RecoverAI evaluates synthetic batch benchmark performance separately from live i
 ### 2. Live Razorpay TEST Mode Sandbox Integration
 - **Interactive TEST Events:** 4 live events generated during UI sandbox testing.
 - **Razorpay TEST Payment Links Generated:** Active links created via `razorpay` SDK (`https://rzp.io/rzp/...`).
-- **Webhook Verified Recoveries:** 1 event (`₹999.00`) confirmed paid via HMAC signature verification.
+- **Webhook Handler Verified:** 1 simulated payment_link.paid event processed with valid HMAC signature and idempotency protection via the internal webhook simulator.
 - **Confirmed Real Currency Recovered:** `₹0.00` (all transactions operate strictly in Razorpay TEST mode sandbox without actual fiat currency transfers).
 
 ---
