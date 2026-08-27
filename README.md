@@ -64,6 +64,12 @@ RecoverAI includes built-in verification tools and a dedicated Streamlit dashboa
 
 ---
 
+## 🎥 Demo Video
+
+[Demo video link will be added before submission]
+
+---
+
 ## 📐 Architecture
 
 ```
@@ -158,16 +164,32 @@ Hardcoded, deterministic Python rules strictly enforce safety boundaries before 
 
 ---
 
-## 📊 Evaluation
+## 🐛 What Broke, and How We Fixed It
 
-RecoverAI evaluated its pipeline against a reproducible benchmark dataset:
+### Case Explorer Table Duplication (204 Rows vs. 102 Events)
+- **Problem:** The `Case Explorer` tab in the dashboard displayed 204 rows even though the database contained only 102 distinct events.
+- **Root Cause:** The `list_cases()` function in `db.py` performed an unconstrained `LEFT JOIN recovery_actions ON ra.event_id = e.event_id`. When an event had multiple recovery attempts or actions logged over time, SQL returned one row per action, duplicating the event in the UI table.
+- **Fix:** Refactored `list_cases()` in `db.py` to join against a subquery filtering for `MAX(created_at)`, ensuring only the latest recovery action per `event_id` is selected. Added regression test `test_list_cases_deduplicates_multiple_recovery_actions` to verify deduplication.
+- **Important Distinction:** This UI table query deduplication is distinct from **webhook pipeline idempotency** (`webhook.py`), which uses unique `external_event_id` checks to reject duplicate HTTP webhook payloads.
 
-- **Benchmark Dataset:** 100 events (60 subscription failures + 40 checkout abandonments) across 24 customer profiles.
-- **Overall Revenue at Risk:** `₹452,810.00` (Total payable value of all detected at-risk events).
-- **Targeted Recovery Value (Attempted):** `₹28,493.00` (Total value associated with permitted recovery-attempt actions).
-- **Confirmed Recovered Revenue:** `₹2,697.00` (Confirmed paid recoveries recorded via webhook / simulation).
-- **Overall Recovery Rate:** `0.60%` (Confirmed recovered revenue relative to total revenue at risk).
+---
+
+## 📊 Evaluation & Metrics Audit
+
+RecoverAI evaluates synthetic batch benchmark performance separately from live interactive Razorpay TEST sandbox events:
+
+### 1. Synthetic 100-Event Benchmark Dataset
+- **Total Events:** 100 benchmark events (60 subscription failures + 40 checkout abandonments across 24 customer profiles).
+- **Revenue at Risk:** `₹450,812.00`
+- **Simulated Recovered Revenue:** `₹9,497.00`
+- **Synthetic Recovery Rate:** `2.11%`
 - **Policy Enforcement Outcomes:** 32 human escalations and 15 policy-blocked events correctly identified.
+
+### 2. Live Razorpay TEST Mode Sandbox Integration
+- **Interactive TEST Events:** 4 live events generated during UI sandbox testing.
+- **Razorpay TEST Payment Links Generated:** Active links created via `razorpay` SDK (`https://rzp.io/rzp/...`).
+- **Webhook Verified Recoveries:** 1 event (`₹999.00`) confirmed paid via HMAC signature verification.
+- **Confirmed Real Currency Recovered:** `₹0.00` (all transactions operate strictly in Razorpay TEST mode sandbox without actual fiat currency transfers).
 
 ---
 
@@ -250,12 +272,21 @@ Run the complete test suite using pytest:
 python -m pytest
 ```
 
-*All 14 unit and integration tests pass cleanly.*
+*All 15 unit and integration tests pass cleanly.*
 
 ---
 
 ## ⚠️ Known Limitations
 
+- **Razorpay TEST Sandbox Limits:** Due to sandbox rate limits and batch processing constraints, only a subset of benchmark events generate real Razorpay TEST payment links, while the remaining 100-event benchmark suite is evaluated synthetically.
 - **TEST Mode Sandbox:** Real integration requires active Razorpay TEST Mode credentials in `.env`.
 - **Heuristic Fallback:** If `LLM_API_KEY` is not provided, ambiguous checkout abandonments fall back to deterministic heuristic diagnosis without failing.
 - **Idempotent Webhooks:** Duplicate webhooks with existing `external_event_id` are safely ignored.
+
+---
+
+## 📚 Further Reading
+
+- [Architecture Overview](docs/architecture.md): Deep-dive into the 7-stage pipeline and data model.
+- [AI Judgment Guidelines](docs/ai-judgment.md): Defensive AI principles and safety boundaries.
+- [Failure Recovery & Resilience](docs/failure-recovery.md): System error handling and fallback specifications.
