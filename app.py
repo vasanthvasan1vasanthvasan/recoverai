@@ -255,6 +255,14 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
+    # Ensure synthetic dataset is generated and processed if decisions table is empty
+    dec_check = fetch_all("SELECT COUNT(*) as count FROM decisions")
+    if not dec_check or dec_check[0]["count"] == 0:
+        evt_check = fetch_all("SELECT COUNT(*) as count FROM events WHERE source = 'synthetic'")
+        if not evt_check or evt_check[0]["count"] == 0:
+            generate_data()
+        process_all_events(channel="synthetic")
+
     with st.sidebar:
         st.subheader("⚙️ System Control")
         st.info("Environment: **Razorpay TEST Mode**")
@@ -262,14 +270,17 @@ def main() -> None:
         st.markdown("---")
         st.markdown("### 🧪 Evaluation Controls")
         if st.button("🔄 Regenerate 100 Synthetic Events", use_container_width=True):
-            with st.spinner("Generating reproducible dataset..."):
+            with st.spinner("Generating & processing benchmark dataset..."):
                 generate_data()
-            st.success("100 Synthetic events generated!")
+                process_all_events(channel="synthetic")
+            st.success("100 Synthetic events generated and processed!")
+            st.rerun()
 
         if st.button("🚀 Run Synthetic Pipeline", use_container_width=True):
             with st.spinner("Processing pipeline across 100 events..."):
                 process_all_events(channel="synthetic")
             st.success("Synthetic pipeline execution complete!")
+            st.rerun()
 
         st.markdown("---")
         st.markdown("### 📊 Dataset View")
