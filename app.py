@@ -255,12 +255,16 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    # Ensure synthetic dataset is generated and processed if decisions table is empty
-    dec_check = fetch_all("SELECT COUNT(*) as count FROM decisions")
-    if not dec_check or dec_check[0]["count"] == 0:
-        evt_check = fetch_all("SELECT COUNT(*) as count FROM events WHERE source = 'synthetic'")
-        if not evt_check or evt_check[0]["count"] == 0:
-            generate_data()
+    # Ensure synthetic dataset is generated and fully processed across all events
+    dec_check = fetch_all("SELECT COUNT(*) as count FROM decisions WHERE action_chosen IS NOT NULL")
+    evt_check = fetch_all("SELECT COUNT(*) as count FROM events WHERE source = 'synthetic'")
+    total_evts = evt_check[0]["count"] if evt_check else 0
+    total_decs = dec_check[0]["count"] if dec_check else 0
+
+    if total_evts == 0:
+        generate_data()
+        process_all_events(channel="synthetic")
+    elif total_decs < total_evts:
         process_all_events(channel="synthetic")
 
     with st.sidebar:
@@ -617,11 +621,11 @@ def main() -> None:
                     }
                     raw_body = json.dumps(test_payload)
                     secret = settings.razorpay_webhook_secret or "test_webhook_secret"
-                    sig = RazorpayClient().generate_webhook_signature(raw_body, secret)
+                    import hashlib, hmac
+                    sig = hmac.new(secret.encode("utf-8"), raw_body.encode("utf-8"), hashlib.sha256).hexdigest()
                     
                     class UIWebhookClient:
                         def verify_webhook_signature(self, body: str, signature: str, sec: str) -> bool:
-                            import hashlib, hmac
                             expected = hmac.new(sec.encode("utf-8"), body.encode("utf-8"), hashlib.sha256).hexdigest()
                             return signature == expected or signature == "simulated_valid_signature"
                     
@@ -648,11 +652,10 @@ def main() -> None:
                     }
                     raw_body = json.dumps(test_payload)
                     secret = settings.razorpay_webhook_secret or "test_webhook_secret"
-                    sig = RazorpayClient().generate_webhook_signature(raw_body, secret)
+                    sig = hmac.new(secret.encode("utf-8"), raw_body.encode("utf-8"), hashlib.sha256).hexdigest()
                     
                     class UIWebhookClient:
                         def verify_webhook_signature(self, body: str, signature: str, sec: str) -> bool:
-                            import hashlib, hmac
                             expected = hmac.new(sec.encode("utf-8"), body.encode("utf-8"), hashlib.sha256).hexdigest()
                             return signature == expected or signature == "simulated_valid_signature"
                     
