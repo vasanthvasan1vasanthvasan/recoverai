@@ -232,7 +232,7 @@ When an event is escalated by safety policy guardrails (e.g. amount exceeding â‚
 RecoverAI provides dual-mode verification for Razorpay payment webhooks:
 
 1. **Flask Listener & Health Monitoring:** `webhook.py` listens on port `8000` (`/webhooks/razorpay`) with a `/health` connectivity endpoint.
-2. **Live Tunnel Delivery (ngrok / Public Tunnel):** When exposed via a public HTTPS tunnel (e.g. ngrok or SSH tunnel), Razorpay servers deliver live `payment_link.paid` events directly to `webhook.py`.
+2. **Live Webhook Integration (Verified):** Real Razorpay TEST-mode webhooks were delivered automatically through a public HTTPS tunnel (Serveo/SSH) to our local webhook handler. Incoming signatures were verified using HMAC-SHA256, and real duplicate delivery was rejected through idempotency protection without double-counting recovered revenue.
 3. **Verified Webhook Simulator & Idempotency Testing:** When running locally, the dashboard UI provides direct HMAC-SHA256 signature generation and POST dispatching to verify signature validation, revenue state updates, and strict database idempotency (`status: duplicate`) without external network dependencies.
 4. **HMAC-SHA256 Security:** Incoming payloads are verified using `RazorpayClient.verify_webhook_signature` against `RAZORPAY_WEBHOOK_SECRET` before updating SQLite records.
 
