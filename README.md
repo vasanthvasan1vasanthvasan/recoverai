@@ -227,14 +227,14 @@ When an event is escalated by safety policy guardrails (e.g. amount exceeding �
 
 ---
 
-## 🌐 Live Webhook Delivery via ngrok
+## 🌐 Webhook Handler & Tunnel Delivery Architecture
 
-RecoverAI supports real-time, end-to-end live webhook delivery from Razorpay servers:
+RecoverAI provides dual-mode verification for Razorpay payment webhooks:
 
-1. **Flask Listener & Health Monitoring:** `webhook.py` runs on port `8000` with a `/health` status endpoint.
-2. **ngrok Tunneling:** Exposes `http://localhost:8000` securely to the internet via HTTPS (`ngrok http 8000`).
-3. **Razorpay Dashboard Integration:** Configure Webhook URL in Razorpay Dashboard (`https://<ngrok-subdomain>.ngrok-free.app/webhooks/razorpay`) with secret validation.
-4. **HMAC-SHA256 Validation & Idempotency:** Validates `X-Razorpay-Signature` and checks `external_event_id` in SQLite database. Duplicate webhook resends return HTTP 200 with `status: duplicate` without double-counting recovered revenue.
+1. **Flask Listener & Health Monitoring:** `webhook.py` listens on port `8000` (`/webhooks/razorpay`) with a `/health` connectivity endpoint.
+2. **Live Tunnel Delivery (ngrok / Public Tunnel):** When exposed via a public HTTPS tunnel (e.g. ngrok or SSH tunnel), Razorpay servers deliver live `payment_link.paid` events directly to `webhook.py`.
+3. **Verified Webhook Simulator & Idempotency Testing:** When running locally, the dashboard UI provides direct HMAC-SHA256 signature generation and POST dispatching to verify signature validation, revenue state updates, and strict database idempotency (`status: duplicate`) without external network dependencies.
+4. **HMAC-SHA256 Security:** Incoming payloads are verified using `RazorpayClient.verify_webhook_signature` against `RAZORPAY_WEBHOOK_SECRET` before updating SQLite records.
 
 ---
 

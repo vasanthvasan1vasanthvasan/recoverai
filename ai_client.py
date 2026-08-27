@@ -20,7 +20,7 @@ class AIClient:
             self.api_key = settings.llm_api_key
 
     def diagnose_abandonment(self, context: dict[str, Any]) -> dict[str, Any]:
-        if not self.api_key:
+        if not self.api_key or not (self.api_key.startswith("AIza") or self.api_key.startswith("sk-")):
             return self._heuristic_response(context)
 
         try:
@@ -29,7 +29,7 @@ class AIClient:
             elif self.api_key.startswith("sk-"):
                 return self._call_openai(context)
             else:
-                return self._call_gemini(context)
+                return self._heuristic_response(context)
         except Exception:
             return self._heuristic_response(context)
 
