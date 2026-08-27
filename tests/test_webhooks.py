@@ -61,3 +61,15 @@ def test_duplicate_event_ignored(monkeypatch):
     assert first_status == 200
     assert second_status == 200
     assert second_body["status"] == "duplicate"
+
+
+def test_health_endpoint():
+    from webhook import app
+
+    client = app.test_client()
+    response = client.get("/health")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["status"] == "ok"
+    assert data["port"] == 8000
+

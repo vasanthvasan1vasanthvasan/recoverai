@@ -58,6 +58,11 @@ def handle_webhook(raw_body: str, signature: str, client: RazorpayClient | None 
     return {"status": "processed", "event_type": event_type}, HTTPStatus.OK
 
 
+@app.get("/health")
+def health_check():
+    return jsonify({"status": "ok", "service": "RecoverAI Webhook Listener", "port": 8000}), HTTPStatus.OK
+
+
 @app.post("/webhooks/razorpay")
 def razorpay_webhook():
     raw_body = request.get_data(as_text=True)
@@ -68,3 +73,4 @@ def razorpay_webhook():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=False)
+

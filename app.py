@@ -567,8 +567,20 @@ def main() -> None:
             })
 
         st.markdown("---")
-        st.markdown("### 🔔 Test Webhook Handler (`payment_link.paid`)")
-        st.caption("Simulate an incoming Razorpay webhook event to test signature verification & idempotency.")
+        st.markdown("### 🌐 Real Live Webhook Delivery via ngrok")
+        st.info(
+            "**Step-by-Step Guide for Live Razorpay Webhook Testing:**\n\n"
+            "1. **Start Local Webhook Listener:** Run `python webhook.py` in terminal (listens on `http://localhost:8000`).\n"
+            "2. **Launch ngrok Tunnel:** Run `ngrok http 8000` to create a public HTTPS endpoint.\n"
+            "3. **Configure Razorpay Dashboard:** Go to *Razorpay Dashboard -> Settings -> Webhooks -> Add Webhook*.\n"
+            "4. **Set Webhook URL:** Enter `https://YOUR_NGROK_SUBDOMAIN.ngrok-free.app/webhooks/razorpay`.\n"
+            "5. **Active Event:** Select `payment_link.paid` and set your `RAZORPAY_WEBHOOK_SECRET`.\n"
+            "6. **Live End-to-End Verification:** Complete a test payment link payment in browser. Razorpay will send live HTTP POST to ngrok -> local listener updates outcome to `paid` with 0 manual intervention!"
+        )
+
+        st.markdown("---")
+        st.markdown("### 🔔 Test Webhook Handler (`payment_link.paid`) & Idempotency")
+        st.caption("Simulate an incoming Razorpay webhook event to test signature verification & strict idempotency.")
 
         wh_col1, wh_col2 = st.columns(2)
         with wh_col1:
@@ -576,8 +588,52 @@ def main() -> None:
             plink_id_test = st.text_input("Payment Link Entity ID", "plink_test_12345")
             amount_test = st.number_input("Paid Amount (Paise)", value=99900)
         with wh_col2:
-            st.write("**Simulated Action**")
-            if st.button("📩 Dispatch Webhook Event", use_container_width=True):
+            st.write("**Webhook Actions**")
+            b1, b2 = st.columns(2)
+            with b1:
+                if st.button("📩 Dispatch Webhook", use_container_width=True):
+                    test_payload = {
+                        "event": "payment_link.paid",
+                        "payload": {
+                            "payment_link": {
+                                "entity": {
+                                    "id": plink_id_test,
+                                    "reference_id": ref_id_test,
+                                    "amount": amount_test,
+                                }
+                            }
+                        },
+                    }
+                    raw_body = json.dumps(test_payload)
+                    sig = "simulated_valid_signature" if not settings.razorpay_webhook_secret else RazorpayClient().generate_webhook_signature(raw_body, settings.razorpay_webhook_secret)
+                    body, status = handle_webhook(raw_body, sig, client=RazorpayClient() if settings.razorpay_webhook_secret else None)
+                    if status == 200:
+                        st.success(f"Webhook Response: {body}")
+                    else:
+                        st.error(f"Webhook Failed: {body}")
+
+            with b2:
+                if st.button("🔄 Resend Duplicate", use_container_width=True):
+                    test_payload = {
+                        "event": "payment_link.paid",
+                        "payload": {
+                            "payment_link": {
+                                "entity": {
+                                    "id": plink_id_test,
+                                    "reference_id": ref_id_test,
+                                    "amount": amount_test,
+                                }
+                            }
+                        },
+                    }
+                    raw_body = json.dumps(test_payload)
+                    sig = "simulated_valid_signature" if not settings.razorpay_webhook_secret else RazorpayClient().generate_webhook_signature(raw_body, settings.razorpay_webhook_secret)
+                    body, status = handle_webhook(raw_body, sig, client=RazorpayClient() if settings.razorpay_webhook_secret else None)
+                    if body.get("status") == "duplicate":
+                        st.warning(f"Idempotency Verified! Duplicate webhook safely ignored: {body}")
+                    else:
+                        st.info(f"Response: {body}")
+
                 payload_dict = {
                     "event": "payment_link.paid",
                     "payload": {
