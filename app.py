@@ -270,27 +270,42 @@ def main() -> None:
             st.success("Synthetic pipeline execution complete!")
 
         st.markdown("---")
+        st.markdown("### 📊 Dataset View")
+        dataset_filter = st.selectbox(
+            "Select Evaluation Scope",
+            ["100-Event Synthetic Benchmark", "Live Razorpay TEST Events", "All Events Combined"],
+            index=0,
+        )
+
+        st.markdown("---")
         st.markdown("### 🔑 API Configuration")
         st.caption(f"Razorpay Integration: **{'Connected ✅' if settings.razorpay_enabled else 'Not Configured ⚠️'}**")
         st.caption(f"LLM API Integration: **{'Active ✅' if settings.llm_api_key else 'Heuristic Fallback ℹ️'}**")
 
     tabs = st.tabs(["📊 Executive Overview", "🔎 Case Explorer", "📜 Audit Trail", "🧪 Evaluation Metrics", "⚡ Live Razorpay TEST Mode"])
 
-    overall_metrics = compute_metrics()
-    synthetic_metrics = compute_metrics(channel="synthetic")
-    razorpay_metrics = compute_metrics(channel="razorpay_test")
+    # Determine active source filter
+    if dataset_filter == "100-Event Synthetic Benchmark":
+        selected_source = "synthetic"
+    elif dataset_filter == "Live Razorpay TEST Events":
+        selected_source = "razorpay_test"
+    else:
+        selected_source = None
+
+    active_metrics = compute_metrics(source=selected_source)
+    synthetic_metrics = compute_metrics(source="synthetic")
 
     # TAB 1: EXECUTIVE OVERVIEW
     with tabs[0]:
-        st.subheader("📈 Performance Snapshot")
-        render_metrics_cards(overall_metrics)
+        st.subheader(f"📈 Performance Snapshot ({dataset_filter})")
+        render_metrics_cards(active_metrics)
         st.markdown("---")
-        render_charts(overall_metrics)
+        render_charts(active_metrics)
 
     # TAB 2: CASE EXPLORER
     with tabs[1]:
-        st.subheader("🔎 Revenue Risk Case Explorer")
-        raw_cases = list_cases()
+        st.subheader(f"🔎 Revenue Risk Case Explorer ({dataset_filter})")
+        raw_cases = list_cases(source=selected_source)
         if not raw_cases:
             st.info("No recovery cases recorded. Click 'Run Synthetic Pipeline' in the sidebar.")
         else:

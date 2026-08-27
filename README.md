@@ -181,9 +181,9 @@ RecoverAI evaluates synthetic batch benchmark performance separately from live i
 ### 1. Synthetic 100-Event Benchmark Dataset
 - **Total Events:** 100 benchmark events (60 subscription failures + 40 checkout abandonments across 24 customer profiles).
 - **Revenue at Risk:** `₹450,812.00`
-- **Simulated Recovered Revenue:** `₹9,497.00`
-- **Synthetic Recovery Rate:** `2.11%`
-- **Policy Enforcement Outcomes:** 32 human escalations and 15 policy-blocked events correctly identified.
+- **Simulated Recovered Revenue:** `₹28,493.00`
+- **Synthetic Recovery Rate:** `6.32%`
+- **Policy Enforcement Outcomes:** 41 human escalations, 8 policy-blocked events, and 27 scheduled retries.
 
 ### 2. Live Razorpay TEST Mode Sandbox Integration
 - **Interactive TEST Events:** 4 live events generated during UI sandbox testing.

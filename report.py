@@ -6,17 +6,18 @@ from typing import Any
 from db import fetch_all
 
 
-def compute_metrics(channel: str | None = None) -> dict[str, Any]:
+def compute_metrics(source: str | None = None, channel: str | None = None) -> dict[str, Any]:
+    filter_val = source or channel
     where_clause = ""
     params: tuple[Any, ...] = ()
-    if channel:
-        where_clause = "WHERE ra.channel = ?"
-        params = (channel,)
+    if filter_val:
+        where_clause = "WHERE e.source = ?"
+        params = (filter_val,)
 
     rows = fetch_all(
         f"""
         SELECT e.event_id, e.amount, e.event_type, d.action_chosen, d.outcome, d.amount_recovered, d.policy_allowed,
-               d.diagnosis, ra.status, ra.channel
+               d.diagnosis, ra.status, ra.channel, e.source
         FROM events e
         LEFT JOIN decisions d ON d.event_id = e.event_id
         LEFT JOIN (

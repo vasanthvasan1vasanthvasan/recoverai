@@ -376,9 +376,15 @@ def update_customer_state(customer_id: str, increment_attempts: bool = False, es
         )
 
 
-def list_cases() -> list[dict[str, Any]]:
+def list_cases(source: str | None = None) -> list[dict[str, Any]]:
+    where_clause = ""
+    params: tuple[Any, ...] = ()
+    if source:
+        where_clause = "WHERE e.source = ?"
+        params = (source,)
+
     rows = fetch_all(
-        """
+        f"""
         SELECT
             e.event_id,
             e.customer_name,
@@ -387,6 +393,7 @@ def list_cases() -> list[dict[str, Any]]:
             e.amount,
             e.currency,
             e.created_at,
+            e.source,
             d.diagnosis,
             d.diagnosis_confidence,
             d.diagnosis_reasoning,
@@ -412,8 +419,10 @@ def list_cases() -> list[dict[str, Any]]:
                 GROUP BY event_id
             ) ra2 ON ra1.event_id = ra2.event_id AND ra1.created_at = ra2.max_created_at
         ) ra ON ra.event_id = e.event_id
+        {where_clause}
         ORDER BY e.created_at DESC
-        """
+        """,
+        params,
     )
     return [dict(row) for row in rows]
 
