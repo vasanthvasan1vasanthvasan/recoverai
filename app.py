@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import pandas as pd
 import plotly.express as px
@@ -621,7 +623,6 @@ def main() -> None:
                     }
                     raw_body = json.dumps(test_payload)
                     secret = settings.razorpay_webhook_secret or "test_webhook_secret"
-                    import hashlib, hmac
                     sig = hmac.new(secret.encode("utf-8"), raw_body.encode("utf-8"), hashlib.sha256).hexdigest()
                     
                     class UIWebhookClient:
