@@ -180,9 +180,11 @@ RecoverAI evaluates synthetic batch benchmark performance separately from live i
 
 ### 1. Synthetic 100-Event Benchmark Dataset
 - **Total Events:** 100 benchmark events (60 subscription failures + 40 checkout abandonments across 24 customer profiles).
-- **Revenue at Risk:** `₹450,812.00`
-- **Simulated Recovered Revenue:** `₹28,493.00`
-- **Synthetic Recovery Rate:** `6.32%`
+- **Total Revenue at Risk:** `₹450,812.00`
+- **Attempted Recovery Volume:** `₹74,076.00` across 24 payment links created.
+- **Confirmed Recovered Revenue:** `₹28,493.00` (strictly from 7 successful payment link completions).
+- **Overall Revenue Recovery Rate:** `6.32%` (recovered revenue vs. total revenue at risk, accounting for cases suppressed by safety policies).
+- **Attempted Link Conversion Rate:** `29.17%` (7 recovered payments / 24 payment links sent).
 - **Policy Enforcement Outcomes:** 41 human escalations, 8 policy-blocked events, and 27 scheduled retries.
 
 ### 2. Live Razorpay TEST Mode Sandbox Integration
