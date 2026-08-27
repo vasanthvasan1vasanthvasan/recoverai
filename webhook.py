@@ -38,7 +38,10 @@ def handle_webhook(raw_body: str, signature: str, client: RazorpayClient | None 
     razorpay_client = client or RazorpayClient()
     if not settings.razorpay_webhook_secret:
         return {"status": "error", "message": "Webhook secret not configured."}, HTTPStatus.INTERNAL_SERVER_ERROR
-    if not razorpay_client.verify_webhook_signature(raw_body, signature, settings.razorpay_webhook_secret):
+    valid = razorpay_client.verify_webhook_signature(raw_body, signature, settings.razorpay_webhook_secret)
+    if not valid and settings.razorpay_key_secret:
+        valid = razorpay_client.verify_webhook_signature(raw_body, signature, settings.razorpay_key_secret)
+    if not valid:
         return {"status": "error", "message": "Invalid signature."}, HTTPStatus.BAD_REQUEST
 
     payload = json.loads(raw_body)
