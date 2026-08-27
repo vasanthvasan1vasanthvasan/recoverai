@@ -92,7 +92,8 @@ RecoverAI includes built-in verification tools and a dedicated Streamlit dashboa
                                                       v
                                   +---------------------------------------+
                                   |            [3. DECIDE]                |
-                                  | Formulates Candidate Recovery Strategy|
+                                  | Selects Candidate Recovery Action     |
+                                  | Payment Link / Human Escalation       |
                                   +---------------------------------------+
                                                       |
                                                       v
