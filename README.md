@@ -1,6 +1,6 @@
-# RecoverAI
+# RevGuard AI
 
-**AI Revenue Recovery Agent**
+**Autonomous AI Revenue Protection & Recovery Agent**
 
 ---
 
@@ -12,7 +12,7 @@ Modern digital merchants lose significant revenue due to payment failures and ch
 
 ## 💡 Solution
 
-**RecoverAI** is an autonomous, policy-bounded AI revenue recovery agent built specifically for Razorpay. It detects revenue at risk, diagnoses root causes using hybrid AI and failure-code intelligence, enforces strict deterministic safety guardrails, and executes bounded recovery actions using **Real Razorpay TEST Mode Payment Links**.
+**RevGuard AI** is an autonomous, policy-bounded AI revenue recovery agent built specifically for Razorpay. It detects revenue at risk, diagnoses root causes using hybrid AI and failure-code intelligence, enforces strict deterministic safety guardrails, and executes bounded recovery actions using **Real Razorpay TEST Mode Payment Links**.
 
 The end-to-end autonomous recovery pipeline follows seven stages:
 $$\text{DETECT} \longrightarrow \text{DIAGNOSE} \longrightarrow \text{DECIDE} \longrightarrow \text{POLICY} \longrightarrow \text{ACT} \longrightarrow \text{TRACK} \longrightarrow \text{REPORT}$$

@@ -248,15 +248,15 @@ def get_status_badge(status: str) -> str:
 
 def main() -> None:
     ensure_database()
-    st.set_page_config(page_title="RecoverAI - Revenue Recovery Agent", page_icon="🛡️", layout="wide")
+    st.set_page_config(page_title="RevGuard AI - Revenue Guardrails & Recovery Agent", page_icon="🛡️", layout="wide")
     inject_custom_css()
 
     st.markdown(
         """
         <div class="hero-banner">
-            <h1 style="margin:0; font-size: 2.2rem; font-weight: 700;">🛡️ RecoverAI</h1>
+            <h1 style="margin:0; font-size: 2.2rem; font-weight: 700;">🛡️ RevGuard AI</h1>
             <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 1.05rem;">
-                Autonomous AI Revenue Recovery Agent for Razorpay Payment Failures & Checkout Abandonment
+                Autonomous AI Revenue Protection & Recovery Agent for Razorpay Payment Failures & Checkout Abandonment
             </p>
         </div>
         """,
