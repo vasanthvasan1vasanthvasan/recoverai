@@ -50,5 +50,28 @@ class Settings:
     def razorpay_enabled(self) -> bool:
         return bool(self.razorpay_key_id and self.razorpay_key_secret)
 
+    @property
+    def twilio_account_sid(self) -> str:
+        return os.getenv("TWILIO_ACCOUNT_SID", "")
+
+    @property
+    def twilio_auth_token(self) -> str:
+        return os.getenv("TWILIO_AUTH_TOKEN", "")
+
+    @property
+    def twilio_whatsapp_number(self) -> str:
+        number = os.getenv("TWILIO_WHATSAPP_NUMBER", "")
+        if number and not number.startswith("whatsapp:"):
+            return f"whatsapp:{number}"
+        return number
+
+    @property
+    def twilio_content_sid(self) -> str:
+        return os.getenv("TWILIO_CONTENT_SID", "")
+
+    @property
+    def twilio_enabled(self) -> bool:
+        return bool(self.twilio_account_sid and self.twilio_auth_token and self.twilio_whatsapp_number)
+
 
 settings = Settings()

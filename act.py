@@ -5,6 +5,7 @@ from message_generator import generate_recovery_message
 from models import ActionResult
 from policy import enforce_amount_protection
 from razorpay_client import RazorpayClient, RazorpayClientError
+from twilio_client import TwilioClient
 
 
 def execute_action(
@@ -15,6 +16,7 @@ def execute_action(
     action: str,
     channel: str = "synthetic",
     razorpay_client: RazorpayClient | None = None,
+    twilio_client: TwilioClient | None = None,
 ) -> ActionResult:
     amount = int(event["amount"])
     enforce_amount_protection(amount, amount)
@@ -37,6 +39,9 @@ def execute_action(
         return result
 
     reference_id = f"RECOVERAI_{event['event_id']}"
+    tw_client = twilio_client or TwilioClient()
+    is_synthetic = (channel == "synthetic")
+
     if channel == "razorpay_test":
         client = razorpay_client or RazorpayClient()
         try:
@@ -51,6 +56,13 @@ def execute_action(
             payment_link_id = response.get("id")
             payment_link_url = response.get("short_url") or response.get("invoice_url")
             message = generate_recovery_message(customer["name"], amount, payment_link_url or "", diagnosis)
+            
+            tw_res = tw_client.send_whatsapp_message(
+                to_phone=customer.get("phone", ""),
+                message=message,
+                is_synthetic=is_synthetic,
+            )
+
             result = ActionResult(
                 action_type=action,
                 status="link_created",
@@ -58,7 +70,20 @@ def execute_action(
                 razorpay_reference=reference_id,
                 razorpay_payment_link_id=payment_link_id,
                 payment_link_url=payment_link_url,
-                metadata={"message_generated": True, "message_preview": message},
+                metadata={
+                    "message_generated": True,
+                    "message_preview": message,
+                    "twilio_sid": tw_res.get("sid"),
+                    "twilio_status": tw_res.get("status"),
+                },
+            )
+            insert_audit_log(
+                event["event_id"],
+                "ACT",
+                "twilio",
+                "whatsapp_message_sent" if tw_res.get("status") != "simulated" else "whatsapp_message_simulated",
+                f"WhatsApp message delivery {tw_res.get('status')} via Twilio Sandbox.",
+                tw_res,
             )
         except RazorpayClientError as exc:
             insert_audit_log(
@@ -79,13 +104,31 @@ def execute_action(
             )
     else:
         message = generate_recovery_message(customer["name"], amount, "SIMULATED_PAYMENT_LINK", diagnosis)
+        tw_res = tw_client.send_whatsapp_message(
+            to_phone=customer.get("phone", ""),
+            message=message,
+            is_synthetic=is_synthetic,
+        )
         result = ActionResult(
             action_type=action,
             status="simulated_link_created",
             amount=amount,
             razorpay_reference=reference_id,
             payment_link_url="SIMULATED_PAYMENT_LINK",
-            metadata={"message_generated": True, "message_preview": message},
+            metadata={
+                "message_generated": True,
+                "message_preview": message,
+                "twilio_sid": tw_res.get("sid"),
+                "twilio_status": tw_res.get("status"),
+            },
+        )
+        insert_audit_log(
+            event["event_id"],
+            "ACT",
+            "twilio",
+            "whatsapp_message_simulated",
+            "WhatsApp message delivery simulated (synthetic mode).",
+            tw_res,
         )
 
     insert_recovery_action(

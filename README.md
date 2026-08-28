@@ -202,6 +202,8 @@ RecoverAI evaluates synthetic batch benchmark performance separately from live i
 - **Interactive TEST Events:** 4 live events generated during UI sandbox testing.
 - **Razorpay TEST Payment Links Generated:** Active links created via `razorpay` SDK (`https://rzp.io/rzp/...`).
 - **Live Webhook Delivery Verified:** 2 real Razorpay TEST-mode payment events delivered automatically through the public HTTPS tunnel (Serveo/SSH), with HMAC-SHA256 verification and real duplicate-delivery idempotency confirmed.
+- **Live WhatsApp Delivery Verified:** Real WhatsApp recovery messages sent via Twilio WhatsApp Sandbox API (`From: whatsapp:+1...` -> `To: whatsapp:+91...`) with real Message SIDs (`MM...`) logged in the audit trail.
+- **Synthetic Benchmark Isolation:** Synthetic benchmark messaging remains 100% simulated with zero external API calls.
 - **Webhook Simulator:** Documented as an additional local/offline testing tool.
 - **Confirmed Real Currency Recovered:** `₹0.00` (all transactions operate strictly in Razorpay TEST mode sandbox without actual fiat currency transfers).
 
@@ -309,7 +311,7 @@ Run the complete test suite using pytest:
 python -m pytest
 ```
 
-*All 18 unit and integration tests pass cleanly.*
+*All 22 unit and integration tests pass cleanly.*
 
 ---
 

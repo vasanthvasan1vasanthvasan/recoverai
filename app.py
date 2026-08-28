@@ -529,21 +529,27 @@ def main() -> None:
             st.write(f"**Environment:** `TEST`")
             st.write(f"**Razorpay Key ID:** `{settings.razorpay_key_id or 'Not Configured'}`")
             st.write(f"**Webhook Secret:** `{'******' if settings.razorpay_webhook_secret else 'Not Configured'}`")
+            st.write(f"**Twilio WhatsApp:** `{settings.twilio_whatsapp_number or 'Not Configured'}`")
         with c_top2:
             if settings.razorpay_enabled:
                 st.success("✅ Razorpay Client Connected to TEST Mode API")
             else:
-                st.warning("⚠️ Credentials not set in `.env`. You can test synthetic simulation or configure `RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET`.")
+                st.warning("⚠️ Credentials not set in `.env`.")
+
+            if settings.twilio_enabled:
+                st.success("📱 Twilio WhatsApp Sandbox Connected")
+            else:
+                st.info("📱 Twilio Messaging: Simulated (Set `TWILIO_ACCOUNT_SID` in `.env`).")
 
         st.markdown("---")
-        st.markdown("### ➕ Create Test Recovery Payment Link")
+        st.markdown("### ➕ Create Test Recovery Payment Link & WhatsApp Action")
 
         with st.form("create_payment_link_form"):
             col_f1, col_f2 = st.columns(2)
             with col_f1:
-                cust_name = st.text_input("Customer Name", "Priya Sharma")
-                cust_email = st.text_input("Customer Email", "priya@example.com")
-                cust_phone = st.text_input("Customer Phone", "9876543210")
+                cust_name = st.text_input("Customer Name", "Vasanth Vasan")
+                cust_email = st.text_input("Customer Email", "vasanth@example.com")
+                cust_phone = st.text_input("Customer Phone (Sandbox Joined)", "+919087823504")
             with col_f2:
                 amount_inr = st.number_input("Amount (in INR ₹)", min_value=1.0, value=999.0, step=10.0)
                 event_type_input = st.selectbox("Event Type", ["subscription_payment_failed", "checkout_abandoned"])
