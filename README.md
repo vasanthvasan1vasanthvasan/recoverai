@@ -274,6 +274,11 @@ LLM_API_KEY=your_llm_api_key_here
 
 # Database File Path
 DATABASE_PATH=data/recoverai.db
+
+# Twilio WhatsApp Sandbox Credentials
+TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
+TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
+TWILIO_WHATSAPP_NUMBER=whatsapp:+your_sandbox_number
 ```
 
 ---
