@@ -62,7 +62,7 @@ def process_event(event_id: str, channel: str = "synthetic") -> dict:
     )
     insert_audit_log(event_id, "ACT", "system", action_result.action_type, action_result.status, action_result.metadata or {})
 
-    if channel == "synthetic" and action_result.status == "simulated_link_created":
+    if channel == "synthetic" and action_result.status in {"link_created", "simulated_link_created"}:
         simulation = simulate_outcome(event_id, diagnosis.diagnosis, int(event["amount"]))
         record_outcome(
             event_id=event_id,
