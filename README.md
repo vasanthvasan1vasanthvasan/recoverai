@@ -215,7 +215,7 @@ RevGuard AI evaluates synthetic batch benchmark performance separately from live
 
 ## ⚡ Razorpay TEST Integration
 
-RecoverAI integrates with Razorpay via the official Python SDK (`razorpay` package):
+RevGuard AI integrates with Razorpay via the official Python SDK (`razorpay` package):
 
 1. **Payment Link Generation (`create_payment_link`):** Generates active payment URLs (`https://rzp.io/rzp/...`) configured with customer contact details, amount in paise, reference ID, and description.
 2. **Signature Verification (`verify_webhook_signature`):** Uses HMAC-SHA256 signature verification to validate incoming webhook events against `RAZORPAY_WEBHOOK_SECRET`.
@@ -237,7 +237,7 @@ When an event is escalated by safety policy guardrails (e.g. amount exceeding �
 
 ## 🌐 Webhook Handler & Tunnel Delivery Architecture
 
-RecoverAI provides dual-mode verification for Razorpay payment webhooks:
+RevGuard AI provides dual-mode verification for Razorpay payment webhooks:
 
 1. **Flask Listener & Health Monitoring:** `webhook.py` listens on port `8000` (`/webhooks/razorpay`) with a `/health` connectivity endpoint.
 2. **Live Webhook Integration (Verified):** Real Razorpay TEST-mode webhooks were delivered automatically through a public HTTPS tunnel (Serveo/SSH) to our local webhook handler. Incoming signatures were verified using HMAC-SHA256, and real duplicate delivery was rejected through idempotency protection without double-counting recovered revenue.

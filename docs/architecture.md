@@ -1,6 +1,6 @@
 # Architecture
 
-RecoverAI uses a compact local architecture built for reliability and measurability.
+RevGuard AI uses a compact local architecture built for reliability and measurability.
 
 ## Pipeline
 

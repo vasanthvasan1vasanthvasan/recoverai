@@ -1,4 +1,4 @@
-# RecoverAI Plan
+# RevGuard AI Plan
 
 ## Phase Status
 

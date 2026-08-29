@@ -603,7 +603,7 @@ def main() -> None:
                 "source": "razorpay_test" if settings.razorpay_enabled else "synthetic",
             })
 
-            with st.spinner("Processing event through RecoverAI pipeline..."):
+            with st.spinner("Processing event through RevGuard AI pipeline..."):
                 target_channel = "razorpay_test" if settings.razorpay_enabled else "synthetic"
                 res = process_event(test_evt_id, channel=target_channel)
 

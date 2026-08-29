@@ -63,7 +63,7 @@ def handle_webhook(raw_body: str, signature: str, client: RazorpayClient | None 
 
 @app.get("/health")
 def health_check():
-    return jsonify({"status": "ok", "service": "RecoverAI Webhook Listener", "port": 8000}), HTTPStatus.OK
+    return jsonify({"status": "ok", "service": "RevGuard AI Webhook Listener", "port": 8000}), HTTPStatus.OK
 
 
 @app.post("/webhooks/razorpay")

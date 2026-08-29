@@ -1,6 +1,6 @@
 # AI Judgment
 
-RecoverAI uses AI narrowly and defensively.
+RevGuard AI uses AI narrowly and defensively.
 
 ## Uses AI
 
