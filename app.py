@@ -382,7 +382,10 @@ def main() -> None:
                             "Channel": c.get("channel"),
                         }
                     )
-                st.dataframe(pd.DataFrame(disp_cases), use_container_width=True, height=260)
+                try:
+                    st.dataframe(pd.DataFrame(disp_cases), use_container_width=True, height=260)
+                except Exception:
+                    st.table(pd.DataFrame(disp_cases).head(20))
 
                 st.markdown("### 🧠 AI Recovery Reasoning & Case Inspector")
                 case_ids = [c["event_id"] for c in filtered_cases]
@@ -499,7 +502,10 @@ def main() -> None:
             stages = df_logs["stage"].unique().tolist()
             selected_stages = st.multiselect("Filter by Stage", options=stages, default=stages)
             filtered_logs = df_logs[df_logs["stage"].isin(selected_stages)]
-            st.dataframe(filtered_logs, use_container_width=True, height=450)
+            try:
+                st.dataframe(filtered_logs, use_container_width=True, height=450)
+            except Exception:
+                st.table(filtered_logs.head(25))
 
     # TAB 5: EVALUATION METRICS
     with tabs[4]:
