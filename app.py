@@ -573,6 +573,11 @@ def main() -> None:
                 amount_inr = st.number_input("Amount (in INR ₹)", min_value=1.0, value=999.0, step=10.0)
                 event_type_input = st.selectbox("Event Type", ["subscription_payment_failed", "checkout_abandoned"])
                 failure_code_input = st.selectbox("Failure Reason", ["insufficient_funds", "card_expired", "bank_decline", "mandate_revoked"])
+                attempt_seq_input = st.selectbox("Recovery Channel / Attempt Sequence", [
+                    "Attempt 1 → WhatsApp Message",
+                    "Attempt 2 → SMS Message",
+                    "Attempt 3 → Twilio Voice Call"
+                ])
 
             submitted = st.form_submit_button("🚀 Execute Autonomous Recovery Flow", use_container_width=True)
 
@@ -582,6 +587,12 @@ def main() -> None:
             test_evt_id = f"TEST_EVT_{uuid.uuid4().hex[:6]}"
             test_cus_id = f"TEST_CUS_{uuid.uuid4().hex[:6]}"
 
+            attempt_num = 1
+            if "Attempt 2" in attempt_seq_input:
+                attempt_num = 2
+            elif "Attempt 3" in attempt_seq_input:
+                attempt_num = 3
+
             insert_customer({
                 "customer_id": test_cus_id,
                 "name": cust_name,
@@ -589,7 +600,7 @@ def main() -> None:
                 "phone": cust_phone,
                 "language_pref": "en",
                 "opted_out": False,
-                "total_attempts": 0,
+                "total_attempts": attempt_num - 1,
             })
             insert_event({
                 "event_id": test_evt_id,
@@ -598,7 +609,7 @@ def main() -> None:
                 "customer_name": cust_name,
                 "amount": amount_paise,
                 "currency": "INR",
-                "attempt_number": 1,
+                "attempt_number": attempt_num,
                 "failure_code": failure_code_input,
                 "source": "razorpay_test" if settings.razorpay_enabled else "synthetic",
             })
