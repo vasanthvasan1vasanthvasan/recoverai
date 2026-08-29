@@ -109,3 +109,84 @@ class TwilioClient:
                 "error_code": "connection_error",
                 "error_message": str(exc),
             }
+
+    def send_sms_message(
+        self,
+        to_phone: str,
+        message: str,
+        *,
+        is_synthetic: bool = True,
+    ) -> dict[str, Any]:
+        """Sends an SMS message via Twilio REST API for live mode or simulated for synthetic."""
+        if is_synthetic or not self.is_configured:
+            return {
+                "status": "simulated_sms",
+                "sid": f"SM_sms_{uuid.uuid4().hex[:16]}",
+                "to": to_phone,
+                "body": message,
+                "error_code": None,
+                "error_message": None,
+            }
+        formatted_to = to_phone.strip()
+        if not formatted_to.startswith("+"):
+            formatted_to = f"+91{formatted_to}" if len(formatted_to) == 10 else f"+{formatted_to}"
+
+        url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Messages.json"
+        from_num = self.whatsapp_number.replace("whatsapp:", "") if self.whatsapp_number else ""
+        payload = {"From": from_num, "To": formatted_to, "Body": message}
+        try:
+            resp = requests.post(
+                url, data=payload, auth=HTTPBasicAuth(self.account_sid, self.auth_token), timeout=10
+            )
+            data = resp.json()
+            return {
+                "status": data.get("status", "queued") if resp.status_code in (200, 201) else "failed",
+                "sid": data.get("sid"),
+                "to": formatted_to,
+                "body": message,
+                "error_code": None if resp.status_code in (200, 201) else str(data.get("code")),
+                "error_message": None if resp.status_code in (200, 201) else str(data.get("message")),
+            }
+        except Exception as exc:
+            return {"status": "failed", "sid": None, "to": formatted_to, "body": message, "error_code": "connection_error", "error_message": str(exc)}
+
+    def make_voice_call(
+        self,
+        to_phone: str,
+        message: str,
+        *,
+        is_synthetic: bool = True,
+    ) -> dict[str, Any]:
+        """Initiates an automated voice call via Twilio Voice API for live mode or simulated for synthetic."""
+        if is_synthetic or not self.is_configured:
+            return {
+                "status": "simulated_voice_call",
+                "sid": f"CA_voice_{uuid.uuid4().hex[:16]}",
+                "to": to_phone,
+                "twiml": f"<Response><Say>{message}</Say></Response>",
+                "error_code": None,
+                "error_message": None,
+            }
+        formatted_to = to_phone.strip()
+        if not formatted_to.startswith("+"):
+            formatted_to = f"+91{formatted_to}" if len(formatted_to) == 10 else f"+{formatted_to}"
+
+        url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Calls.json"
+        from_num = self.whatsapp_number.replace("whatsapp:", "") if self.whatsapp_number else ""
+        twiml = f"<Response><Say voice='alice'>{message}</Say></Response>"
+        payload = {"From": from_num, "To": formatted_to, "Twiml": twiml}
+        try:
+            resp = requests.post(
+                url, data=payload, auth=HTTPBasicAuth(self.account_sid, self.auth_token), timeout=10
+            )
+            data = resp.json()
+            return {
+                "status": data.get("status", "queued") if resp.status_code in (200, 201) else "failed",
+                "sid": data.get("sid"),
+                "to": formatted_to,
+                "twiml": twiml,
+                "error_code": None if resp.status_code in (200, 201) else str(data.get("code")),
+                "error_message": None if resp.status_code in (200, 201) else str(data.get("message")),
+            }
+        except Exception as exc:
+            return {"status": "failed", "sid": None, "to": formatted_to, "body": message, "error_code": "connection_error", "error_message": str(exc)}

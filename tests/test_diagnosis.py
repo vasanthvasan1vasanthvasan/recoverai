@@ -45,7 +45,7 @@ def test_candidate_action_ranking():
         {"total_attempts": 0},
         diag,
     )
-    assert len(candidates) == 4
+    assert len(candidates) == 6
     # Ranked by expected recovery value descending
     assert candidates[0].expected_recovery >= candidates[1].expected_recovery
     assert candidates[0].action == "send_payment_link"

@@ -97,11 +97,19 @@ def evaluate_candidate_actions(
         retry_prob = 0.25
         retry_reason = "Automated retry attempt."
 
-    # 3. Human Escalation
+    # 3. SMS Outreach
+    sms_prob = round(link_prob * 0.75, 2)
+    sms_reason = "Direct SMS fallback message with payment link."
+
+    # 4. Interactive Voice Call
+    voice_prob = round(link_prob * 0.60, 2)
+    voice_reason = "Automated voice call reminder for high-value friction recovery."
+
+    # 5. Human Escalation
     escalate_prob = 0.20 if attempts < 3 else 0.10
     escalate_reason = "Human review queue routing for high-touch intervention."
 
-    # 4. Stop / No Action
+    # 6. Stop / No Action
     stop_prob = 0.0
     stop_reason = "No automated action."
 
@@ -119,6 +127,18 @@ def evaluate_candidate_actions(
             reason=retry_reason,
         ),
         CandidateAction(
+            action="send_sms",
+            probability=sms_prob,
+            expected_recovery=round(amount * sms_prob, 2),
+            reason=sms_reason,
+        ),
+        CandidateAction(
+            action="voice_call",
+            probability=voice_prob,
+            expected_recovery=round(amount * voice_prob, 2),
+            reason=voice_reason,
+        ),
+        CandidateAction(
             action="escalate_to_human",
             probability=round(escalate_prob, 2),
             expected_recovery=round(amount * escalate_prob, 2),
@@ -131,6 +151,7 @@ def evaluate_candidate_actions(
             reason=stop_reason,
         ),
     ]
+
 
     candidates.sort(key=lambda c: c.expected_recovery, reverse=True)
     return candidates
