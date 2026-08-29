@@ -26,8 +26,12 @@ $$\text{DETECT} \longrightarrow \text{DIAGNOSE} \longrightarrow \text{DECIDE} \l
 
 ---
 
+## ✨ Key Features
+
 - **Next-Best-Action Engine:** Ranks candidate actions by Expected Recovery Value ($EV = P \times \text{Amount}$) to select optimal policy-allowed recovery strategies.
 - **Adaptive Multi-Channel Recovery:** Sequentially routes outreach through **WhatsApp** (Attempt 1) $\rightarrow$ **SMS** (Attempt 2) $\rightarrow$ **Twilio Voice Call** (Attempt 3) $\rightarrow$ **Human Escalation** (Attempt 4+).
+- **Explicit Recovery State Machine:** Persists case lifecycle state (`case_status`, `attempt_count`, `last_channel`, `last_channel_status`, `next_channel`, `payment_status`, `recovered_amount`).
+- **Real Provider Delivery Status Tracking:** Distinguishes API dispatch (`DISPATCHED`) $\rightarrow$ Provider Confirmation (`PROVIDER_ACCEPTED`) $\rightarrow$ Delivery (`DELIVERED`) $\rightarrow$ Failure (`FAILED`).
 - **Payment Failure Recovery:** Automatic handling of recurring subscription payment failures.
 - **Checkout Abandonment Recovery:** AI-driven diagnosis of multi-step checkout drop-offs.
 - **Failed Subscription Recovery:** Categorized failure code mapping (`insufficient_funds`, `card_expired`, `bank_decline`, `mandate_revoked`).
@@ -316,7 +320,7 @@ Run the complete test suite using pytest:
 python -m pytest
 ```
 
-*All 22 unit and integration tests pass cleanly.*
+*All 27 unit and end-to-end integration tests pass cleanly.*
 
 ---
 
