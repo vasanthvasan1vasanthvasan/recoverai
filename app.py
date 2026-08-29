@@ -685,7 +685,12 @@ def main() -> None:
             """
         )
         if live_actions:
-            render_custom_table([dict(row) for row in live_actions], max_rows=25)
+            formatted_actions = []
+            for row in live_actions:
+                d = dict(row)
+                d["amount"] = format_inr(d.get("amount") or 0)
+                formatted_actions.append(d)
+            render_custom_table(formatted_actions, max_rows=25)
         else:
             st.info("No Razorpay TEST mode actions recorded yet.")
 
