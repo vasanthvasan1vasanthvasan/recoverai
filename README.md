@@ -26,13 +26,13 @@ $$\text{DETECT} \longrightarrow \text{DIAGNOSE} \longrightarrow \text{DECIDE} \l
 
 ---
 
-## ✨ Key Features
-
+- **Next-Best-Action Engine:** Ranks candidate actions by Expected Recovery Value ($EV = P \times \text{Amount}$) to select optimal policy-allowed recovery strategies.
+- **Adaptive Multi-Channel Recovery:** Sequentially routes outreach through **WhatsApp** (Attempt 1) $\rightarrow$ **SMS** (Attempt 2) $\rightarrow$ **Twilio Voice Call** (Attempt 3) $\rightarrow$ **Human Escalation** (Attempt 4+).
 - **Payment Failure Recovery:** Automatic handling of recurring subscription payment failures.
 - **Checkout Abandonment Recovery:** AI-driven diagnosis of multi-step checkout drop-offs.
 - **Failed Subscription Recovery:** Categorized failure code mapping (`insufficient_funds`, `card_expired`, `bank_decline`, `mandate_revoked`).
 - **AI Diagnosis:** Natural-language root cause analysis via **Google Gemini 2.5 Flash / OpenAI** with confidence scoring.
-- **Deterministic Safety Policies:** Non-overridable Python rules enforcing customer contact limits, quiet hours, and amount caps.
+- **Deterministic Safety Policies:** Non-overridable Python rules enforcing customer contact limits, quiet hours (21:00–09:00 IST), and amount caps.
 - **Razorpay TEST Payment Links:** Dynamic generation of real, active Razorpay payment links (`https://rzp.io/rzp/...`).
 - **Webhook Verification:** Flask webhook handler with HMAC-SHA256 signature verification.
 - **Idempotency:** Automatic duplicate webhook suppression using unique `external_event_id` tracking.
