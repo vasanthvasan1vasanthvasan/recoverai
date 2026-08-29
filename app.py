@@ -28,10 +28,29 @@ from report import compute_metrics
 from webhook import handle_webhook
 
 
-class UIWebhookClient:
-    def verify_webhook_signature(self, body: str, signature: str, secret: str) -> bool:
-        expected = hmac.new(secret.encode("utf-8"), body.encode("utf-8"), hashlib.sha256).hexdigest()
-        return signature == expected or signature == "simulated_valid_signature"
+def render_custom_table(rows: list[dict[str, Any]], max_rows: int = 25) -> None:
+    if not rows:
+        st.info("No data available.")
+        return
+    sliced = rows[:max_rows]
+    headers = list(sliced[0].keys())
+    header_html = "".join(f"<th style='background:#1e293b; color:#f8fafc; padding:10px 12px; text-align:left; font-weight:600; font-size:0.85rem; border-bottom:1px solid rgba(255,255,255,0.1);'>{h}</th>" for h in headers)
+    
+    rows_html = ""
+    for idx, row in enumerate(sliced):
+        bg = "rgba(15, 23, 42, 0.6)" if idx % 2 == 0 else "rgba(30, 41, 59, 0.6)"
+        cells = "".join(f"<td style='padding:8px 12px; font-size:0.82rem; color:#cbd5e1; border-bottom:1px solid rgba(255,255,255,0.05);'>{row.get(h, '')}</td>" for h in headers)
+        rows_html += f"<tr style='background:{bg};'>{cells}</tr>"
+        
+    table_html = f"""
+    <div style="overflow-x:auto; border-radius:10px; border:1px solid rgba(255,255,255,0.12); margin-bottom:15px; max-height:400px; overflow-y:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead style="position:sticky; top:0; z-index:1;"><tr>{header_html}</tr></thead>
+            <tbody>{rows_html}</tbody>
+        </table>
+    </div>
+    """
+    st.markdown(table_html, unsafe_allow_html=True)
 
 
 def inject_custom_css() -> None:
@@ -382,7 +401,7 @@ def main() -> None:
                             "Channel": c.get("channel"),
                         }
                     )
-                st.table(pd.DataFrame(disp_cases).head(20))
+                render_custom_table(disp_cases, max_rows=20)
 
                 st.markdown("### 🧠 AI Recovery Reasoning & Case Inspector")
                 case_ids = [c["event_id"] for c in filtered_cases]
@@ -499,7 +518,7 @@ def main() -> None:
             stages = df_logs["stage"].unique().tolist()
             selected_stages = st.multiselect("Filter by Stage", options=stages, default=stages)
             filtered_logs = df_logs[df_logs["stage"].isin(selected_stages)]
-            st.table(filtered_logs.head(25))
+            render_custom_table(filtered_logs.to_dict('records'), max_rows=25)
 
     # TAB 5: EVALUATION METRICS
     with tabs[4]:
