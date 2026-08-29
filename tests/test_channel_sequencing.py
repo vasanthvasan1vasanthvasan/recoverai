@@ -11,8 +11,8 @@ def test_channel_sequencing_attempts():
     assert select_channel_for_attempt(2, customer, "2026-08-20T14:00:00+05:30") == "sms"
     # Attempt 3 (Daytime) -> voice
     assert select_channel_for_attempt(3, customer, "2026-08-20T14:00:00+05:30") == "voice"
-    # Attempt 3 (Quiet Hours 22:00) -> falls back to sms
-    assert select_channel_for_attempt(3, customer, "2026-08-20T22:00:00+05:30") == "sms"
+    # Attempt 3 (Quiet Hours 22:00) -> retry_scheduled
+    assert select_channel_for_attempt(3, customer, "2026-08-20T22:00:00+05:30") == "retry_scheduled"
     # Attempt >= 4 -> human
     assert select_channel_for_attempt(4, customer, "2026-08-20T14:00:00+05:30") == "human"
 

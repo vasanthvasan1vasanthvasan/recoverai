@@ -68,6 +68,9 @@ def execute_action(
                     is_synthetic=is_synthetic,
                 )
                 action_audit_label = "sms_message_sent" if tw_res.get("status") != "simulated_sms" else "sms_message_simulated"
+            elif selected_subchannel == "retry_scheduled":
+                tw_res = {"status": "scheduled", "sid": None, "reason": "Voice call scheduled for next permitted time window outside quiet hours."}
+                action_audit_label = "voice_call_scheduled_quiet_hours"
             elif selected_subchannel == "voice":
                 tw_res = tw_client.make_voice_call(
                     to_phone=customer.get("phone", ""),

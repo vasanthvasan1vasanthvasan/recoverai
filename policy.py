@@ -74,7 +74,7 @@ def select_channel_for_attempt(
         return "sms"
     elif attempt_count == 3:
         if is_quiet_hours(current_time):
-            return "sms"
+            return "retry_scheduled"
         return "voice"
     else:
         return "human"
