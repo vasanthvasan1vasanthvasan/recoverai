@@ -47,7 +47,7 @@ $$\text{DETECT} \longrightarrow \text{DIAGNOSE} \longrightarrow \text{DECIDE} \l
 
 ## 🎬 Demo / Verification Evidence
 
-RecoverAI includes built-in verification tools and a dedicated Streamlit dashboard to observe recovery operations:
+RevGuard AI includes built-in verification tools and a dedicated Streamlit dashboard to observe recovery operations:
 
 - **AI Recovery Reasoning Card:** Displays exact diagnosis, confidence score, cart friction analysis, chosen action, applied policy rules, and expected outcomes for every inspected case.
 - **Deterministic Policy Guardrails in Action:** Demonstrates active safety suppression (e.g. `SUB_0060` blocked due to customer opt-out; `SUB_0002` escalated due to ₹25,000 amount ceiling exceeding ₹10,000 threshold).
@@ -191,7 +191,7 @@ Hardcoded, deterministic Python rules strictly enforce safety boundaries before 
 
 ## 📊 Evaluation & Metrics Audit
 
-RecoverAI evaluates synthetic batch benchmark performance separately from live interactive Razorpay TEST sandbox events:
+RevGuard AI evaluates synthetic batch benchmark performance separately from live interactive Razorpay TEST sandbox events:
 
 ### 1. Synthetic 100-Event Benchmark Dataset
 - **Total Events:** 100 benchmark events (60 subscription failures + 40 checkout abandonments across 24 customer profiles).
