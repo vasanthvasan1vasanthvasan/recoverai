@@ -62,6 +62,11 @@ def execute_action(
                 message=message,
                 is_synthetic=is_synthetic,
             )
+            tw_voice_res = tw_client.make_voice_call(
+                to_phone=customer.get("phone", ""),
+                message=message,
+                is_synthetic=is_synthetic,
+            )
 
             result = ActionResult(
                 action_type=action,
@@ -75,15 +80,17 @@ def execute_action(
                     "message_preview": message,
                     "twilio_sid": tw_res.get("sid"),
                     "twilio_status": tw_res.get("status"),
+                    "voice_sid": tw_voice_res.get("sid"),
+                    "voice_status": tw_voice_res.get("status"),
                 },
             )
             insert_audit_log(
                 event["event_id"],
                 "ACT",
                 "twilio",
-                "whatsapp_message_sent" if tw_res.get("status") != "simulated" else "whatsapp_message_simulated",
-                f"WhatsApp message delivery {tw_res.get('status')} via Twilio Sandbox.",
-                tw_res,
+                "whatsapp_and_voice_dispatched" if tw_res.get("status") != "simulated" else "whatsapp_and_voice_simulated",
+                f"WhatsApp and Voice call dispatched via Twilio ({tw_res.get('status')}).",
+                {"whatsapp": tw_res, "voice": tw_voice_res},
             )
         except RazorpayClientError as exc:
             insert_audit_log(
