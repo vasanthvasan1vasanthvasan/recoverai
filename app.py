@@ -685,7 +685,7 @@ def main() -> None:
             """
         )
         if live_actions:
-            st.dataframe(pd.DataFrame([dict(row) for row in live_actions]), use_container_width=True)
+            render_custom_table([dict(row) for row in live_actions], max_rows=25)
         else:
             st.info("No Razorpay TEST mode actions recorded yet.")
 
