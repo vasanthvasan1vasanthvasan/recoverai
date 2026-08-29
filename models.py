@@ -29,6 +29,13 @@ ALLOWED_ABANDONMENT_DIAGNOSES = {
     "unknown",
 }
 
+
+
+
+
+
+
+
 CONTACT_ACTIONS = {"send_payment_link", "retry_now"}
 
 
@@ -38,6 +45,14 @@ class DiagnosisResult:
     confidence: float
     reasoning: str
     source: str
+
+
+@dataclass
+class CandidateAction:
+    action: str
+    probability: float
+    expected_recovery: float
+    reason: str
 
 
 @dataclass
@@ -60,3 +75,4 @@ class ActionResult:
     error_code: str | None = None
     error_message: str | None = None
     metadata: dict[str, Any] | None = None
+

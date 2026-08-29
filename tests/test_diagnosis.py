@@ -33,3 +33,20 @@ def test_checkout_abandonment_llm_path():
         AIClient(api_key="dummy"),
     )
     assert result.diagnosis == "payment_friction"
+
+
+def test_candidate_action_ranking():
+    from diagnose import evaluate_candidate_actions
+    from models import DiagnosisResult
+
+    diag = DiagnosisResult(diagnosis="insufficient_funds", confidence=1.0, reasoning="Test", source="rules")
+    candidates = evaluate_candidate_actions(
+        {"amount": 99900, "failure_code": "insufficient_funds"},
+        {"total_attempts": 0},
+        diag,
+    )
+    assert len(candidates) == 4
+    # Ranked by expected recovery value descending
+    assert candidates[0].expected_recovery >= candidates[1].expected_recovery
+    assert candidates[0].action == "send_payment_link"
+
