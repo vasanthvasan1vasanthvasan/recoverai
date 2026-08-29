@@ -51,3 +51,31 @@ def evaluate_policy(
     if is_quiet_hours(current_time):
         return PolicyDecision(False, "retry_scheduled", "Quiet hours in IST block customer contact action.", False, "quiet_hours")
     return PolicyDecision(True, "send_payment_link", "Recovery is within policy and amount limit.", False, "autonomous_recovery")
+
+
+def select_channel_for_attempt(
+    attempt_count: int,
+    customer: dict,
+    current_time: str | None = None,
+) -> str:
+    """Selects the next best recovery channel based on attempt count, customer opt-out, and quiet hours.
+
+    Attempt 0 or 1: whatsapp
+    Attempt 2: sms
+    Attempt 3: voice (falls back to sms during quiet hours)
+    Attempt >= 4: human escalation
+    """
+    if customer.get("opted_out"):
+        return "none"
+
+    if attempt_count <= 1:
+        return "whatsapp"
+    elif attempt_count == 2:
+        return "sms"
+    elif attempt_count == 3:
+        if is_quiet_hours(current_time):
+            return "sms"
+        return "voice"
+    else:
+        return "human"
+

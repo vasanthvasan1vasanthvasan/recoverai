@@ -57,16 +57,31 @@ def execute_action(
             payment_link_url = response.get("short_url") or response.get("invoice_url")
             message = generate_recovery_message(customer["name"], amount, payment_link_url or "", diagnosis)
             
-            tw_res = tw_client.send_whatsapp_message(
-                to_phone=customer.get("phone", ""),
-                message=message,
-                is_synthetic=is_synthetic,
-            )
-            tw_voice_res = tw_client.make_voice_call(
-                to_phone=customer.get("phone", ""),
-                message=message,
-                is_synthetic=is_synthetic,
-            )
+            attempt_num = event.get("attempt_number", 1)
+            from policy import select_channel_for_attempt
+            selected_subchannel = select_channel_for_attempt(attempt_num, customer, event.get("created_at"))
+
+            if selected_subchannel == "sms":
+                tw_res = tw_client.send_sms_message(
+                    to_phone=customer.get("phone", ""),
+                    message=message,
+                    is_synthetic=is_synthetic,
+                )
+                action_audit_label = "sms_message_sent" if tw_res.get("status") != "simulated_sms" else "sms_message_simulated"
+            elif selected_subchannel == "voice":
+                tw_res = tw_client.make_voice_call(
+                    to_phone=customer.get("phone", ""),
+                    message=message,
+                    is_synthetic=is_synthetic,
+                )
+                action_audit_label = "voice_call_initiated" if tw_res.get("status") != "simulated_voice_call" else "voice_call_simulated"
+            else:
+                tw_res = tw_client.send_whatsapp_message(
+                    to_phone=customer.get("phone", ""),
+                    message=message,
+                    is_synthetic=is_synthetic,
+                )
+                action_audit_label = "whatsapp_message_sent" if tw_res.get("status") != "simulated" else "whatsapp_message_simulated"
 
             result = ActionResult(
                 action_type=action,
@@ -78,19 +93,18 @@ def execute_action(
                 metadata={
                     "message_generated": True,
                     "message_preview": message,
+                    "subchannel": selected_subchannel,
                     "twilio_sid": tw_res.get("sid"),
                     "twilio_status": tw_res.get("status"),
-                    "voice_sid": tw_voice_res.get("sid"),
-                    "voice_status": tw_voice_res.get("status"),
                 },
             )
             insert_audit_log(
                 event["event_id"],
                 "ACT",
                 "twilio",
-                "whatsapp_and_voice_dispatched" if tw_res.get("status") != "simulated" else "whatsapp_and_voice_simulated",
-                f"WhatsApp and Voice call dispatched via Twilio ({tw_res.get('status')}).",
-                {"whatsapp": tw_res, "voice": tw_voice_res},
+                action_audit_label,
+                f"Channel '{selected_subchannel}' dispatch ({tw_res.get('status')}).",
+                tw_res,
             )
         except RazorpayClientError as exc:
             insert_audit_log(
