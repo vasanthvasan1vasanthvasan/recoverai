@@ -173,8 +173,11 @@ class TwilioClient:
 
         url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Calls.json"
         from_num = self.whatsapp_number.replace("whatsapp:", "") if self.whatsapp_number else ""
-        twiml = f"<Response><Say voice='alice'>{message}</Say></Response>"
-        payload = {"From": from_num, "To": formatted_to, "Twiml": twiml}
+        payload = {
+            "From": from_num,
+            "To": formatted_to,
+            "Url": "https://webhooks.twilio.com/v1/Voice/Template/voice_speech_recognition",
+        }
         try:
             resp = requests.post(
                 url, data=payload, auth=HTTPBasicAuth(self.account_sid, self.auth_token), timeout=10
