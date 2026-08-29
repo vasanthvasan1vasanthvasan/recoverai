@@ -35,7 +35,7 @@ $$\text{DETECT} \longrightarrow \text{DIAGNOSE} \longrightarrow \text{DECIDE} \l
 - **Payment Failure Recovery:** Automatic handling of recurring subscription payment failures.
 - **Checkout Abandonment Recovery:** AI-driven diagnosis of multi-step checkout drop-offs.
 - **Failed Subscription Recovery:** Categorized failure code mapping (`insufficient_funds`, `card_expired`, `bank_decline`, `mandate_revoked`).
-- **AI Diagnosis:** Natural-language root cause analysis via **Google Gemini 2.5 Flash / OpenAI** with confidence scoring.
+- **AI Diagnosis:** Natural-language root cause analysis via **Google Gemini 2.5 Flash** with confidence scoring and heuristic fallback.
 - **Deterministic Safety Policies:** Non-overridable Python rules enforcing customer contact limits, quiet hours (21:00–09:00 IST), and amount caps.
 - **Razorpay TEST Payment Links:** Dynamic generation of real, active Razorpay payment links (`https://rzp.io/rzp/...`).
 - **Webhook Verification:** Flask webhook handler with HMAC-SHA256 signature verification.
@@ -137,7 +137,7 @@ RecoverAI includes built-in verification tools and a dedicated Streamlit dashboa
 - `app.py`: Interactive Streamlit Dashboard (`Executive Overview`, `Case Explorer`, `Audit Trail`, `Evaluation Metrics`, `Live Razorpay TEST Mode`).
 - `pipeline.py`: Orchestrates the 7-stage recovery pipeline.
 - `diagnose.py`: Hybrid rule-based failure diagnosis and LLM-powered abandonment diagnosis.
-- `ai_client.py`: Gemini 2.5 Flash / OpenAI API client with heuristic fallback.
+- `ai_client.py`: Gemini 2.5 Flash API client with deterministic heuristic fallback.
 - `policy.py`: Deterministic Python safety engine enforcing financial guardrails.
 - `act.py`: Recovery action execution module.
 - `razorpay_client.py`: Razorpay SDK wrapper (`create_payment_link`, `verify_webhook_signature`).
