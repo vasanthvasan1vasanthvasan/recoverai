@@ -63,7 +63,7 @@ def execute_action(
             quota_exceeded = True
             import uuid
             payment_link_id = f"plink_sandbox_{uuid.uuid4().hex[:8]}"
-            payment_link_url = "https://rzp.io/l/demo"
+            payment_link_url = "https://pages.razorpay.com/pl_sandbox_fallback"
             insert_audit_log(
                 event["event_id"],
                 "ACT",
@@ -106,7 +106,7 @@ def execute_action(
 
         result = ActionResult(
             action_type=action,
-            status="link_created",
+            status="link_created" if not quota_exceeded else "fallback_simulated",
             amount=amount,
             razorpay_reference=reference_id,
             razorpay_payment_link_id=payment_link_id,
