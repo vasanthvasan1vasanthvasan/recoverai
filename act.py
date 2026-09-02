@@ -73,7 +73,9 @@ def execute_action(
                 {"warning": str(exc), "fallback_url": payment_link_url},
             )
 
-        message = generate_recovery_message(customer["name"], amount, payment_link_url or "", diagnosis)
+        message = generate_recovery_message(
+            customer["name"], amount, payment_link_url or "", diagnosis, lang=customer.get("language_pref", "en")
+        )
         
         attempt_num = event.get("attempt_number", 1)
         from policy import select_channel_for_attempt
@@ -129,7 +131,9 @@ def execute_action(
             tw_res,
         )
     else:
-        message = generate_recovery_message(customer["name"], amount, "SIMULATED_PAYMENT_LINK", diagnosis)
+        message = generate_recovery_message(
+            customer["name"], amount, "SIMULATED_PAYMENT_LINK", diagnosis, lang=customer.get("language_pref", "en")
+        )
         tw_res = tw_client.send_whatsapp_message(
             to_phone=customer.get("phone", ""),
             message=message,
