@@ -624,6 +624,13 @@ def main() -> None:
                 res = process_event(test_evt_id, channel=target_channel)
 
             st.success(f"Pipeline executed for Case `{test_evt_id}`!")
+            
+            act_res = res.get("action", {})
+            link_url = act_res.get("payment_link_url")
+            if link_url:
+                st.info(f"🔗 **Razorpay Recovery Link:** `{link_url}`")
+                st.link_button("👉 Open Payment Link in Browser", link_url, use_container_width=True)
+
             st.json({
                 "diagnosis": res["diagnosis"],
                 "policy_decision": res["policy"],
