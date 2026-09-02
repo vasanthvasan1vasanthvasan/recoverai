@@ -28,6 +28,11 @@ from report import compute_metrics
 from webhook import handle_webhook
 
 
+def format_inr(paise: int | float) -> str:
+    amount_rupees = (paise or 0) / 100.0
+    return f"₹{amount_rupees:,.2f}"
+
+
 def render_custom_table(rows: list[dict[str, Any]], max_rows: int = 25) -> None:
     if not rows:
         st.info("No data available.")
