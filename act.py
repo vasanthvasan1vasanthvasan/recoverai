@@ -63,7 +63,7 @@ def execute_action(
             quota_exceeded = True
             import uuid
             payment_link_id = f"plink_sandbox_{uuid.uuid4().hex[:8]}"
-            payment_link_url = f"https://rzp.io/rzp/{uuid.uuid4().hex[:6]}"
+            payment_link_url = f"https://pages.razorpay.com/pl_{uuid.uuid4().hex[:8]}"
             insert_audit_log(
                 event["event_id"],
                 "ACT",
