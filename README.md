@@ -301,9 +301,9 @@ python run_evaluation.py
 
 ### 3. Launch the Streamlit Dashboard
 ```bash
-python -m streamlit run app.py
+python -m streamlit run app.py --server.port 8507
 ```
-*Open `http://localhost:8501` in your browser.*
+*Open `http://localhost:8507` in your browser.*
 
 ### 4. Run Webhook Service (Optional)
 ```bash
