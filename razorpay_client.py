@@ -60,7 +60,13 @@ class RazorpayClient:
             "notify": {"sms": False, "email": False},
             "reminder_enable": False,
         }
-        return self._with_retry(lambda: self._require_client().payment_link.create(data=payload))
+        res = self._with_retry(lambda: self._require_client().payment_link.create(data=payload))
+        if isinstance(res, dict):
+            print(f"[RAZORPAY_API] Created Payment Link ID: {res.get('id')}")
+            print(f"[RAZORPAY_API] short_url: {res.get('short_url')}")
+            print(f"[RAZORPAY_API] status: {res.get('status')}")
+            print(f"[RAZORPAY_API] amount: {res.get('amount')}, amount_paid: {res.get('amount_paid')}")
+        return res
 
     def fetch_payment_link(self, payment_link_id: str) -> dict[str, Any]:
         return self._with_retry(lambda: self._require_client().payment_link.fetch(payment_link_id))
