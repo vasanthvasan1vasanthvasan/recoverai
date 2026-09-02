@@ -95,7 +95,7 @@ RevGuard AI includes built-in verification tools and a dedicated Streamlit dashb
                                   +---------------------------------------+
                                   |            [3. DECIDE]                |
                                   | Selects Candidate Recovery Action     |
-                                  | Payment Link / Human Escalation       |
+                                  | Payment Link / Retry / Escalation / Stop|
                                   +---------------------------------------+
                                                       |
                                                       v
@@ -231,7 +231,7 @@ When an event is escalated by safety policy guardrails (e.g. amount exceeding â‚
 - **Reviewer Inspection:** Human operators can inspect customer profile details, failure context, AI diagnosis, confidence score, and policy escalation reasons.
 - **Approve Workflow (`approve_case`):** Re-executes the original candidate recovery action (e.g. creating payment links) using the unified `act.py` execution engine.
 - **Reject Workflow (`reject_case`):** Immediately marks the case as `stopped` and logs a `human_rejected` audit record with **0 network/API calls executed**.
-- **Historical Benchmark Integrity:** Reviews update pending queue status while keeping historical decision escalation metrics strictly consistent for benchmark evaluation integrity.
+- **Historical Benchmark Integrity:** Reviews update pending queue status while preserving the original benchmark evaluation metrics.
 
 ---
 
