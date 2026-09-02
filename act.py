@@ -59,7 +59,7 @@ def execute_action(
             )
             payment_link_id = response.get("id")
             payment_link_url = response.get("short_url") or response.get("invoice_url")
-        except RazorpayClientError as exc:
+        except Exception as exc:
             quota_exceeded = True
             import uuid
             payment_link_id = f"plink_sandbox_{uuid.uuid4().hex[:8]}"
