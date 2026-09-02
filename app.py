@@ -574,6 +574,7 @@ def main() -> None:
                 cust_name = st.text_input("Customer Name", "Vasanth Vasan")
                 cust_email = st.text_input("Customer Email", "vasanth@example.com")
                 cust_phone = st.text_input("Customer Phone (Sandbox Joined)", "+919087823504")
+                lang_input = st.selectbox("Preferred Language", ["English (en)", "Hinglish (hi)"])
             with col_f2:
                 amount_inr = st.number_input("Amount (in INR ₹)", min_value=1.0, value=999.0, step=10.0)
                 event_type_input = st.selectbox("Event Type", ["subscription_payment_failed", "checkout_abandoned"])
@@ -598,12 +599,14 @@ def main() -> None:
             elif "Attempt 3" in attempt_seq_input:
                 attempt_num = 3
 
+            lang_code = "hi" if "Hinglish" in lang_input else "en"
+
             insert_customer({
                 "customer_id": test_cus_id,
                 "name": cust_name,
                 "email": cust_email,
                 "phone": cust_phone,
-                "language_pref": "en",
+                "language_pref": lang_code,
                 "opted_out": False,
                 "total_attempts": attempt_num - 1,
             })
