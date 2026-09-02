@@ -29,9 +29,7 @@ $$\text{DETECT} \longrightarrow \text{DIAGNOSE} \longrightarrow \text{DECIDE} \l
 ## ✨ Key Features
 
 - **Next-Best-Action Engine:** Ranks candidate actions by Expected Recovery Value ($EV = P \times \text{Amount}$) to select optimal policy-allowed recovery strategies.
-- **Adaptive Multi-Channel Recovery:** Sequentially routes outreach through **WhatsApp** (Attempt 1) $\rightarrow$ **SMS** (Attempt 2) $\rightarrow$ **Twilio Voice Call** (Attempt 3) $\rightarrow$ **Human Escalation** (Attempt 4+).
-- **Explicit Recovery State Machine:** Persists case lifecycle state (`case_status`, `attempt_count`, `last_channel`, `last_channel_status`, `next_channel`, `payment_status`, `recovered_amount`).
-- **Real Provider Delivery Status Tracking:** Distinguishes API dispatch (`DISPATCHED`) $\rightarrow$ Provider Confirmation (`PROVIDER_ACCEPTED`) $\rightarrow$ Delivery (`DELIVERED`) $\rightarrow$ Failure (`FAILED`).
+- **Adaptive Multi-Channel Recovery:** Sequentially routes outreach through **WhatsApp** (Attempt 1) $\rightarrow$ **SMS** (Attempt 2) $\rightarrow$ **Twilio Voice Call** (Attempt 3) $\rightarrow$ **Human Escalation** (Attempt 4+). WhatsApp and SMS delivery are live-verified (messages received on device); Voice Call successfully initiates a real Twilio API call (confirmed via API response and Call SID).
 - **Payment Failure Recovery:** Automatic handling of recurring subscription payment failures.
 - **Checkout Abandonment Recovery:** AI-driven diagnosis of multi-step checkout drop-offs.
 - **Failed Subscription Recovery:** Categorized failure code mapping (`insufficient_funds`, `card_expired`, `bank_decline`, `mandate_revoked`).
@@ -207,6 +205,8 @@ RevGuard AI evaluates synthetic batch benchmark performance separately from live
 - **Razorpay TEST Payment Links Generated:** Active links created via `razorpay` SDK (`https://rzp.io/rzp/...`).
 - **Live Webhook Delivery Verified:** 2 real Razorpay TEST-mode payment events delivered automatically through the public HTTPS tunnel (Serveo/SSH), with HMAC-SHA256 verification and real duplicate-delivery idempotency confirmed.
 - **Live WhatsApp Delivery Verified:** Real WhatsApp recovery messages sent via Twilio WhatsApp Sandbox API (`From: whatsapp:+1...` -> `To: whatsapp:+91...`) with real Message SIDs (`MM...`) logged in the audit trail.
+- **Live SMS Delivery Verified:** Real SMS recovery messages sent via Twilio SMS API (`From: +1...` -> `To: +91...`) with real Message SIDs logged in the audit trail.
+- **Live Voice Call Initiation Verified:** Real Twilio Voice Calls initiated via Twilio Voice API with real Call SIDs (`CA...`) logged in the audit trail (API initiation confirmed; live call completion pending recipient response).
 - **Synthetic Benchmark Isolation:** Synthetic benchmark messaging remains 100% simulated with zero external API calls.
 - **Webhook Simulator:** Documented as an additional local/offline testing tool.
 - **Confirmed Real Currency Recovered:** `₹0.00` (all transactions operate strictly in Razorpay TEST mode sandbox without actual fiat currency transfers).
