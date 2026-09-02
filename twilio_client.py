@@ -187,7 +187,7 @@ class TwilioClient:
                 "status": data.get("status", "queued") if resp.status_code in (200, 201) else "failed",
                 "sid": data.get("sid"),
                 "to": formatted_to,
-                "twiml": twiml,
+                "twiml": f"<Response><Say>{message}</Say></Response>",
                 "error_code": None if resp.status_code in (200, 201) else str(data.get("code")),
                 "error_message": None if resp.status_code in (200, 201) else str(data.get("message")),
             }
