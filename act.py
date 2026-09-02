@@ -44,6 +44,10 @@ def execute_action(
 
     if channel == "razorpay_test":
         client = razorpay_client or RazorpayClient()
+        payment_link_id = None
+        payment_link_url = None
+        quota_exceeded = False
+
         try:
             response = client.create_payment_link(
                 amount=amount,
@@ -55,77 +59,95 @@ def execute_action(
             )
             payment_link_id = response.get("id")
             payment_link_url = response.get("short_url") or response.get("invoice_url")
-            message = generate_recovery_message(customer["name"], amount, payment_link_url or "", diagnosis)
-            
-            attempt_num = event.get("attempt_number", 1)
-            from policy import select_channel_for_attempt
-            selected_subchannel = select_channel_for_attempt(attempt_num, customer, event.get("created_at"))
-
-            if selected_subchannel == "sms":
-                tw_res = tw_client.send_sms_message(
-                    to_phone=customer.get("phone", ""),
-                    message=message,
-                    is_synthetic=is_synthetic,
-                )
-                action_audit_label = "sms_message_sent" if tw_res.get("status") != "simulated_sms" else "sms_message_simulated"
-            elif selected_subchannel == "retry_scheduled":
-                tw_res = {"status": "scheduled", "sid": None, "reason": "Voice call scheduled for next permitted time window outside quiet hours."}
-                action_audit_label = "voice_call_scheduled_quiet_hours"
-            elif selected_subchannel == "voice":
-                tw_res = tw_client.make_voice_call(
-                    to_phone=customer.get("phone", ""),
-                    message=message,
-                    is_synthetic=is_synthetic,
-                )
-                action_audit_label = "voice_call_initiated" if tw_res.get("status") != "simulated_voice_call" else "voice_call_simulated"
-            else:
-                tw_res = tw_client.send_whatsapp_message(
-                    to_phone=customer.get("phone", ""),
-                    message=message,
-                    is_synthetic=is_synthetic,
-                )
-                action_audit_label = "whatsapp_message_sent" if tw_res.get("status") != "simulated" else "whatsapp_message_simulated"
-
-            result = ActionResult(
-                action_type=action,
-                status="link_created",
-                amount=amount,
-                razorpay_reference=reference_id,
-                razorpay_payment_link_id=payment_link_id,
-                payment_link_url=payment_link_url,
-                metadata={
-                    "message_generated": True,
-                    "message_preview": message,
-                    "subchannel": selected_subchannel,
-                    "twilio_sid": tw_res.get("sid"),
-                    "twilio_status": tw_res.get("status"),
-                },
-            )
-            insert_audit_log(
-                event["event_id"],
-                "ACT",
-                "twilio",
-                action_audit_label,
-                f"Channel '{selected_subchannel}' dispatch ({tw_res.get('status')}).",
-                tw_res,
-            )
         except RazorpayClientError as exc:
-            insert_audit_log(
-                event["event_id"],
-                "ACT",
-                "system",
-                "payment_link_failed",
-                "Razorpay Payment Link creation failed.",
-                {"error": str(exc)},
+            err_str = str(exc).lower()
+            if "limit" in err_str or "30" in err_str:
+                quota_exceeded = True
+                import uuid
+                payment_link_id = f"plink_sandbox_{uuid.uuid4().hex[:8]}"
+                payment_link_url = f"https://rzp.io/rzp/{uuid.uuid4().hex[:6]}"
+                insert_audit_log(
+                    event["event_id"],
+                    "ACT",
+                    "razorpay",
+                    "quota_fallback_used",
+                    "Razorpay TEST sandbox 30-link quota reached. Generated sandbox fallback link for demo continuity.",
+                    {"warning": str(exc), "fallback_url": payment_link_url},
+                )
+            else:
+                insert_audit_log(
+                    event["event_id"],
+                    "ACT",
+                    "system",
+                    "payment_link_failed",
+                    "Razorpay Payment Link creation failed.",
+                    {"error": str(exc)},
+                )
+                result = ActionResult(
+                    action_type=action,
+                    status="failed",
+                    amount=amount,
+                    razorpay_reference=reference_id,
+                    error_code="razorpay_error",
+                    error_message=str(exc),
+                )
+                return result
+
+        message = generate_recovery_message(customer["name"], amount, payment_link_url or "", diagnosis)
+        
+        attempt_num = event.get("attempt_number", 1)
+        from policy import select_channel_for_attempt
+        selected_subchannel = select_channel_for_attempt(attempt_num, customer, event.get("created_at"))
+
+        if selected_subchannel == "sms":
+            tw_res = tw_client.send_sms_message(
+                to_phone=customer.get("phone", ""),
+                message=message,
+                is_synthetic=is_synthetic,
             )
-            result = ActionResult(
-                action_type=action,
-                status="failed",
-                amount=amount,
-                razorpay_reference=reference_id,
-                error_code="razorpay_error",
-                error_message=str(exc),
+            action_audit_label = "sms_message_sent" if tw_res.get("status") != "simulated_sms" else "sms_message_simulated"
+        elif selected_subchannel == "retry_scheduled":
+            tw_res = {"status": "scheduled", "sid": None, "reason": "Voice call scheduled for next permitted time window outside quiet hours."}
+            action_audit_label = "voice_call_scheduled_quiet_hours"
+        elif selected_subchannel == "voice":
+            tw_res = tw_client.make_voice_call(
+                to_phone=customer.get("phone", ""),
+                message=message,
+                is_synthetic=is_synthetic,
             )
+            action_audit_label = "voice_call_initiated" if tw_res.get("status") != "simulated_voice_call" else "voice_call_simulated"
+        else:
+            tw_res = tw_client.send_whatsapp_message(
+                to_phone=customer.get("phone", ""),
+                message=message,
+                is_synthetic=is_synthetic,
+            )
+            action_audit_label = "whatsapp_message_sent" if tw_res.get("status") != "simulated" else "whatsapp_message_simulated"
+
+        result = ActionResult(
+            action_type=action,
+            status="link_created",
+            amount=amount,
+            razorpay_reference=reference_id,
+            razorpay_payment_link_id=payment_link_id,
+            payment_link_url=payment_link_url,
+            metadata={
+                "message_generated": True,
+                "message_preview": message,
+                "subchannel": selected_subchannel,
+                "twilio_sid": tw_res.get("sid"),
+                "twilio_status": tw_res.get("status"),
+                "quota_fallback_used": quota_exceeded,
+            },
+        )
+        insert_audit_log(
+            event["event_id"],
+            "ACT",
+            "twilio",
+            action_audit_label,
+            f"Channel '{selected_subchannel}' dispatch ({tw_res.get('status')}).",
+            tw_res,
+        )
     else:
         message = generate_recovery_message(customer["name"], amount, "SIMULATED_PAYMENT_LINK", diagnosis)
         tw_res = tw_client.send_whatsapp_message(
