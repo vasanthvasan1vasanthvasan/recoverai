@@ -619,6 +619,7 @@ def main() -> None:
                 "currency": "INR",
                 "attempt_number": attempt_num,
                 "failure_code": failure_code_input,
+                "created_at": "2026-09-03T14:00:00",
                 "source": "razorpay_test" if settings.razorpay_enabled else "synthetic",
             })
 
