@@ -45,6 +45,8 @@ $$\text{DETECT} \longrightarrow \text{DIAGNOSE} \longrightarrow \text{DECIDE} \l
 
 ## 🎬 Demo / Verification Evidence
 
+🎥 **[Watch 5-Minute Demo Video on Google Drive](https://drive.google.com/file/d/1klmS69oKLMhctDMiHiFcz5Onm_caylOu/view)**
+
 RevGuard AI includes built-in verification tools and a dedicated Streamlit dashboard to observe recovery operations:
 
 - **AI Recovery Reasoning Card:** Displays exact diagnosis, confidence score, cart friction analysis, chosen action, applied policy rules, and expected outcomes for every inspected case.
