@@ -78,58 +78,58 @@ RevGuard AI includes built-in verification tools and a dedicated Streamlit dashb
 
 ```
                                   +---------------------------------------+
-                                  |     100 Synthetic Benchmark Events    |
+                                  |    100 Synthetic Benchmark Events     |
                                   +---------------------------------------+
                                                       |
                                                       v
                                   +---------------------------------------+
-                                  |           [1. DETECT]                 |
-                                  |   Loads Event & Customer Profile      |
+                                  |              [1. DETECT]              |
+                                  |    Loads Event & Customer Profile     |
                                   +---------------------------------------+
                                                       |
                                                       v
                                   +---------------------------------------+
-                                  |           [2. DIAGNOSE]               |
-                                  | Rule Engine (Failures) + Gemini AI    |
+                                  |             [2. DIAGNOSE]             |
+                                  |  Rule Engine (Failures) + Gemini AI   |
                                   +---------------------------------------+
                                                       |
                                                       v
                                   +---------------------------------------+
-                                  |            [3. DECIDE]                |
-                                  | Selects Candidate Recovery Action     |
-                                  | Payment Link / Retry / Escalation / Stop|
+                                  |              [3. DECIDE]              |
+                                  |   Selects Candidate Recovery Action   |
+                                  | Payment Link / Retry / Escalate / Stop|
                                   +---------------------------------------+
                                                       |
                                                       v
                                   +---------------------------------------+
-                                  |        [4. POLICY GUARDRAILS]         |
+                                  |         [4. POLICY GUARDRAILS]        |
                                   | Quiet Hours | Opt-Out | Caps | Limits |
                                   +---------------------------------------+
                                                       |
                               +-----------------------+-----------------------+
                               |                                               |
-                           ALLOWED                                           BLOCKED
+                           ALLOWED                                         BLOCKED
                               |                                               |
                               v                                               v
-              +---------------------------+                   +---------------------------+
-              |          [5. ACT]         |                   |      POLICY BLOCKED       |
-              | Razorpay TEST Payment Link|                   | No autonomous action      |
-              | Created via API           |                   | taken                     |
-              +-------------+-------------+                   | → Human Review            |
-                            |                                  | → Stop / Suppress         |
-                            v                                  +-------------+-------------+
-              +---------------------------+                                  |
-              |        [6. TRACK]         |                                  |
-              | Webhook Listener          |                                  |
-              | (HMAC & Idempotency)      |                                  |
-              +-------------+-------------+                                  |
-                            |                                               |
-                            +-----------------------+-----------------------+
-                                                    |
-                                                    v
+              +-------------------------------+               +-------------------------------+
+              |           [5. ACT]            |               |        POLICY BLOCKED         |
+              |  Razorpay TEST Payment Link   |               |   No autonomous action taken  |
+              |        Created via API        |               |   -> Human Review Queue       |
+              +---------------+---------------+               |   -> Stop / Suppress          |
+                              |                               +---------------+---------------+
+                              v                                               |
+              +-------------------------------+                               |
+              |          [6. TRACK]           |                               |
+              |       Webhook Listener        |                               |
+              |     (HMAC & Idempotency)      |                               |
+              +---------------+---------------+                               |
+                              |                                               |
+                              +-----------------------+-----------------------+
+                                                      |
+                                                      v
                                   +---------------------------------------+
-                                  |            [7. REPORT]                |
-                                  | Streamlit Dashboard & SQLite Metrics  |
+                                  |              [7. REPORT]              |
+                                  |  Streamlit Dashboard & SQLite Metrics |
                                   +---------------------------------------+
 ```
 
